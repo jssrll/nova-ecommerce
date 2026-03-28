@@ -1070,10 +1070,6 @@ body {
   }
   .faq-answer-apple {
     font-size: 0.8rem;
-    padding: 0 16px !important;
-  }
-  .faq-item-apple.active .faq-answer-apple {
-    padding: 14px 16px !important;
   }
   .contact-form-apple {
     padding: 24px 20px !important;
@@ -1570,32 +1566,8 @@ body {
     padding: 10px 12px !important;
     font-size: 0.85rem;
   }
-  .profile-modal {
-    max-width: 95%;
-  }
-  .profile-content {
-    padding: 20px !important;
-  }
-  .profile-avatar i {
-    font-size: 3.5rem !important;
-  }
-  .info-row {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 4px;
-    padding: 8px 0;
-  }
-  .info-label {
-    font-size: 0.8rem;
-  }
-  .info-value {
-    font-size: 0.85rem;
-  }
 }
 
-.profile-modal {
-  max-width: 480px;
-}
 @keyframes modalSlideIn {
   from { opacity: 0; transform: translateY(-20px); }
   to { opacity: 1; transform: translateY(0); }
@@ -1691,83 +1663,118 @@ body {
   margin-top: 8px;
 }
 
-/* Profile Page Styles */
+/* ========================================
+   PROFILE MODAL - RESTORED ORIGINAL UI
+   ======================================== */
+.profile-modal {
+  max-width: 500px;
+}
+
 .profile-content {
   padding: 24px;
 }
+
 .profile-avatar {
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
+
 .profile-avatar i {
-  font-size: 4rem;
+  font-size: 5rem;
   color: #e63946;
 }
+
 .profile-info {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
+
 .info-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 0;
+  padding: 12px 0;
   border-bottom: 1px solid #f0f0f0;
 }
+
 .info-row:last-child {
   border-bottom: none;
 }
+
 .info-label {
   font-weight: 500;
   color: #86868b;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
 }
+
 .info-label i {
-  width: 22px;
+  width: 24px;
   margin-right: 8px;
   color: #e63946;
 }
+
 .info-value {
   font-weight: 600;
   color: #1d1d1f;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
 }
+
 .logout-profile-btn {
   width: 100%;
-  margin-top: 12px;
+  margin-top: 16px;
   background: #ff5e6e;
   color: white;
   border: none;
-  padding: 12px;
+  padding: 14px;
   border-radius: 980px;
   cursor: pointer;
   font-weight: 500;
   transition: 0.2s;
   font-size: 0.9rem;
 }
+
 .logout-profile-btn:hover {
   background: #e63946;
+  transform: scale(1.02);
 }
 
-.user-name {
-  font-size: 0.8rem;
-  margin-left: 6px;
-  font-weight: 500;
-  color: #e63946;
-}
-.logout-btn {
-  background: none;
-  border: none;
-  color: #ff5e6e;
-  font-size: 0.7rem;
-  cursor: pointer;
-  margin-left: 6px;
-  padding: 2px 6px;
-  border-radius: 12px;
-  transition: 0.2s;
-}
-.logout-btn:hover {
-  background: #ff5e6e;
-  color: white;
+/* Responsive Profile Modal for Mobile */
+@media (max-width: 768px) {
+  .profile-modal {
+    max-width: 95%;
+  }
+  
+  .profile-content {
+    padding: 20px;
+  }
+  
+  .profile-avatar i {
+    font-size: 4rem;
+  }
+  
+  .info-row {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+  }
+  
+  .info-label {
+    font-size: 0.85rem;
+  }
+  
+  .info-label i {
+    width: 20px;
+    font-size: 0.85rem;
+  }
+  
+  .info-value {
+    font-size: 0.85rem;
+  }
+  
+  .logout-profile-btn {
+    padding: 12px;
+    font-size: 0.85rem;
+  }
 }
 
 /* Loading Indicator */
