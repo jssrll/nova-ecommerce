@@ -7,8 +7,8 @@ let searchQuery = "";
 let currentPage = "home";
 let currentUser = null;
 
-// Google Sheets Web App URL (Your deployed URL)
-const GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbz8ATaFp-5O79m_URmWnUma6i_LWq7Mh5E662dRhgLe6QlvuevTNYHxuqHyA17K3IIg4g/exec";
+// Your Google Sheets Web App URL
+const GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbwFUkVGaNon2nys2zGWhiVe0Mwi3oSw8dU9sUs18BeSGU3Yi1a24WHjhZboi0nIkpPxEA/exec";
 
 // ========================================
 // HELPER FUNCTIONS
@@ -37,7 +37,6 @@ function showToast(message, duration = 1800) {
 function openAccountModal() {
   const modal = document.getElementById("accountModal");
   modal.classList.add("show");
-  // Reset forms and loading states
   document.getElementById("loginForm").reset();
   document.getElementById("registerForm").reset();
   const registerBtn = document.getElementById("registerBtn");
@@ -62,11 +61,10 @@ function openProfileModal() {
     return;
   }
   
-  // Update profile info
   document.getElementById("profileName").innerText = currentUser.name;
   document.getElementById("profileId").innerText = currentUser.id;
   document.getElementById("profilePhone").innerText = currentUser.phone;
-  document.getElementById("profileJoined").innerText = currentUser.joined || "03/28/2026";
+  document.getElementById("profileJoined").innerText = currentUser.joined || new Date().toLocaleDateString();
   document.getElementById("profileBalance").innerHTML = `₱${(currentUser.balance || 0).toLocaleString()}`;
   
   const modal = document.getElementById("profileModal");
@@ -94,10 +92,12 @@ function switchTab(tabName) {
   }
 }
 
-// Login Handler with Google Sheets
+// ========================================
+// LOGIN WITH PHONE NUMBER FIX (Option 3)
+// ========================================
 async function handleLogin(event) {
   event.preventDefault();
-  const phone = document.getElementById("loginPhone").value.trim();
+  let phone = document.getElementById("loginPhone").value.trim();
   const password = document.getElementById("loginPassword").value;
   const loginBtn = document.getElementById("loginBtn");
   
@@ -106,29 +106,53 @@ async function handleLogin(event) {
     return;
   }
   
-  // Disable button and show loading
   loginBtn.disabled = true;
   loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
   
   try {
-    // Fetch users from Google Sheets
     const response = await fetch(`${GOOGLE_SHEETS_URL}?action=getUsers`);
     const users = await response.json();
     
-    const user = users.find(u => u.phone === phone && u.password === password);
+    console.log("Available users:", users);
+    console.log("Trying to login with phone:", phone, "password:", password);
+    
+    // Try to find user with flexible phone number matching
+    const user = users.find(u => {
+      const sheetPhone = u.phone.toString();
+      const inputPhone = phone.toString();
+      
+      console.log("Comparing:", sheetPhone, "vs", inputPhone);
+      
+      // Exact match
+      if (sheetPhone === inputPhone) return true;
+      
+      // If input starts with 09 and sheet doesn't have 0 prefix
+      if (inputPhone.startsWith('09') && sheetPhone === inputPhone.substring(1)) return true;
+      
+      // If sheet starts with 09 and input doesn't have 0 prefix
+      if (sheetPhone.startsWith('09') && inputPhone === sheetPhone.substring(1)) return true;
+      
+      // If input has +63 prefix
+      if (inputPhone.startsWith('+63') && sheetPhone === inputPhone.substring(3)) return true;
+      if (inputPhone.startsWith('+63') && sheetPhone === '0' + inputPhone.substring(3)) return true;
+      
+      // If sheet has +63 prefix
+      if (sheetPhone.startsWith('+63') && inputPhone === sheetPhone.substring(3)) return true;
+      if (sheetPhone.startsWith('+63') && inputPhone === '0' + sheetPhone.substring(3)) return true;
+      
+      return false;
+    });
     
     if (user) {
-      // Load credit from localStorage or default to 0
-      const savedCredit = localStorage.getItem(`nova_credit_${user.phone}`);
-      const balance = savedCredit ? parseInt(savedCredit) : 0;
+      console.log("✅ User found:", user);
       
       currentUser = {
         id: user.accountId,
         name: user.name,
         phone: user.phone,
         password: user.password,
-        balance: balance,
-        joined: user.joined || new Date().toLocaleDateString()
+        balance: user.balance || 0,
+        joined: new Date().toLocaleDateString()
       };
       
       localStorage.setItem("nova_user", JSON.stringify(currentUser));
@@ -137,19 +161,21 @@ async function handleLogin(event) {
       closeAccountModal();
       renderCartUI();
     } else {
+      console.log("❌ No user found");
       showToast("Invalid phone number or password", 1500);
     }
   } catch (error) {
     console.error("Login error:", error);
     showToast("Login failed. Please try again.", 1500);
   } finally {
-    // Reset button
     loginBtn.disabled = false;
     loginBtn.innerHTML = "Login";
   }
 }
 
-// Register Handler with Loading Indicator and Account ID Generation
+// ========================================
+// REGISTER FUNCTION
+// ========================================
 async function handleRegister(event) {
   event.preventDefault();
   const name = document.getElementById("regFullName").value.trim();
@@ -169,22 +195,19 @@ async function handleRegister(event) {
     return;
   }
   
-  if (!/^09\d{9}$/.test(phone)) {
-    showToast("Please enter a valid Philippine phone number (09XXXXXXXXX)", 1500);
+  if (!/^09\d{9}$/.test(phone) && !/^\d{10}$/.test(phone)) {
+    showToast("Please enter a valid phone number (09XXXXXXXXX)", 1500);
     return;
   }
   
-  // Generate a random 9-digit Account ID
   const accountId = Math.floor(100000000 + Math.random() * 900000000).toString();
   const joinedDate = new Date().toLocaleDateString();
   
-  // Disable button and show loading indicator
   registerBtn.disabled = true;
   registerBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating...';
   loadingIndicator.style.display = "block";
   
   try {
-    // Send data to Google Sheets with Account ID
     const formData = new URLSearchParams();
     formData.append("action", "addUser");
     formData.append("name", name);
@@ -211,7 +234,6 @@ async function handleRegister(event) {
       };
       
       localStorage.setItem("nova_user", JSON.stringify(currentUser));
-      localStorage.setItem(`nova_credit_${phone}`, "0");
       document.getElementById("userNameDisplay").innerText = currentUser.name.split(' ')[0];
       showToast(`✅ Account created successfully!\n\nWelcome, ${name}!\nYour Account ID: ${accountId}`, 4000);
       closeAccountModal();
@@ -223,7 +245,6 @@ async function handleRegister(event) {
     console.error("Registration error:", error);
     showToast("Registration failed. Please try again.", 1500);
   } finally {
-    // Reset button and hide loading
     registerBtn.disabled = false;
     registerBtn.innerHTML = "Create Account";
     loadingIndicator.style.display = "none";
@@ -236,7 +257,6 @@ function logout() {
   document.getElementById("userNameDisplay").innerText = "";
   closeProfileModal();
   showToast("Logged out successfully", 1500);
-  // Reset cart
   cart = [];
   updateCartBadge();
   saveCartToLocal();
@@ -244,36 +264,52 @@ function logout() {
 }
 
 // ========================================
-// CREDIT FUNCTIONS (Store in localStorage)
+// CREDIT FUNCTIONS
 // ========================================
 function loadUserCredit() {
   if (currentUser) {
-    const savedCredit = localStorage.getItem(`nova_credit_${currentUser.phone}`);
-    const credit = savedCredit ? parseInt(savedCredit) : (currentUser.balance || 0);
-    if (currentUser.balance !== credit) {
-      currentUser.balance = credit;
-      localStorage.setItem("nova_user", JSON.stringify(currentUser));
-    }
-    return credit;
+    return currentUser.balance || 0;
   }
   return 0;
 }
 
 function saveUserCredit() {
   if (currentUser) {
-    localStorage.setItem(`nova_credit_${currentUser.phone}`, currentUser.balance);
     localStorage.setItem("nova_user", JSON.stringify(currentUser));
   }
 }
 
-function addUserCredit(amount) {
-  if (currentUser) {
-    currentUser.balance = (currentUser.balance || 0) + amount;
-    saveUserCredit();
-    showToast(`₱${amount} added to your credit balance! Current balance: ₱${currentUser.balance}`, 2500);
-    return currentUser.balance;
+async function addUserCredit(amount) {
+  if (!currentUser) return 0;
+  
+  try {
+    const formData = new URLSearchParams();
+    formData.append("action", "updateBalance");
+    formData.append("phone", currentUser.phone);
+    formData.append("amount", amount);
+    formData.append("operation", "add");
+    
+    const response = await fetch(GOOGLE_SHEETS_URL, {
+      method: "POST",
+      body: formData
+    });
+    
+    const result = await response.json();
+    
+    if (result.success) {
+      currentUser.balance = result.newBalance;
+      localStorage.setItem("nova_user", JSON.stringify(currentUser));
+      showToast(`₱${amount} added to your credit balance! Current balance: ₱${currentUser.balance}`, 2500);
+      return currentUser.balance;
+    } else {
+      showToast(result.message || "Failed to add credit", 1500);
+      return 0;
+    }
+  } catch (error) {
+    console.error("Credit error:", error);
+    showToast("Failed to add credit. Please try again.", 1500);
+    return 0;
   }
-  return 0;
 }
 
 // ========================================
@@ -310,10 +346,6 @@ function loadCartFromLocal() {
   const saved = localStorage.getItem("nova_cart");
   cart = saved ? JSON.parse(saved) : [];
   updateCartBadge();
-  renderCartUI();
-}
-
-function updateCartUI() {
   renderCartUI();
 }
 
@@ -456,7 +488,6 @@ function loadFeaturedPage() {
   if (currentUser) loadUserCredit();
 }
 
-// Redeem Code Function with Google Sheets Logging
 async function redeemCode() {
   if (!currentUser) {
     showToast("Please login to redeem codes", 1500);
@@ -475,44 +506,54 @@ async function redeemCode() {
   
   if (promoCodeRewards[code]) {
     const reward = promoCodeRewards[code];
-    
-    // Show loading state
     const redeemBtn = document.querySelector('#featuredPage .btn-primary-apple');
     const originalBtnText = redeemBtn.innerHTML;
+    
     redeemBtn.disabled = true;
     redeemBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Redeeming...';
     
     try {
-      // Add credit to user
-      if (reward.type === "peso") {
-        addUserCredit(reward.value);
+      const formData = new URLSearchParams();
+      formData.append("action", "updateBalance");
+      formData.append("phone", currentUser.phone);
+      formData.append("amount", reward.value);
+      formData.append("operation", "add");
+      
+      const response = await fetch(GOOGLE_SHEETS_URL, {
+        method: "POST",
+        body: formData
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        currentUser.balance = result.newBalance;
+        localStorage.setItem("nova_user", JSON.stringify(currentUser));
         
-        // Log redemption to Google Sheets
-        const formData = new URLSearchParams();
-        formData.append("action", "addRedemption");
-        formData.append("timestamp", new Date().toISOString());
-        formData.append("accountId", currentUser.id);
-        formData.append("fullName", currentUser.name);
-        formData.append("phone", currentUser.phone);
-        formData.append("codeInput", code);
-        formData.append("reward", `${reward.value} peso credit - ${reward.message}`);
+        const logData = new URLSearchParams();
+        logData.append("action", "addRedemption");
+        logData.append("timestamp", new Date().toISOString());
+        logData.append("accountId", currentUser.id);
+        logData.append("fullName", currentUser.name);
+        logData.append("phone", currentUser.phone);
+        logData.append("codeInput", code);
+        logData.append("reward", `${reward.value} peso credit - ${reward.message}`);
         
-        // Send to Google Sheets (don't wait for response to avoid delay)
         fetch(GOOGLE_SHEETS_URL, {
           method: "POST",
-          body: formData
+          body: logData
         }).catch(err => console.error("Logging error:", err));
         
         messageDiv.innerHTML = `<div class="code-message success">✓ ${reward.message} Your credit balance: ₱${currentUser.balance}</div>`;
         codeInput.value = "";
-        
         setTimeout(() => { messageDiv.innerHTML = ""; }, 3000);
+      } else {
+        showToast(result.message || "Redemption failed", 1500);
       }
     } catch (error) {
       console.error("Redemption error:", error);
       showToast("Redemption failed. Please try again.", 1500);
     } finally {
-      // Reset button
       redeemBtn.disabled = false;
       redeemBtn.innerHTML = originalBtnText;
     }
@@ -587,33 +628,61 @@ function initCartDrawer() {
   const drawer = document.getElementById('cartDrawer');
   const closeBtn = document.getElementById('closeCartBtn');
   const checkoutBtn = document.getElementById('checkoutBtn');
+  
   function openDrawer() { overlay.classList.add('open'); drawer.classList.add('open'); renderCartUI(); }
   function closeDrawer() { overlay.classList.remove('open'); drawer.classList.remove('open'); }
+  
   if (cartIcon) cartIcon.addEventListener('click', openDrawer);
   if (closeBtn) closeBtn.addEventListener('click', closeDrawer);
   if (overlay) overlay.addEventListener('click', closeDrawer);
+  
   if (checkoutBtn) {
-    checkoutBtn.addEventListener('click', () => {
+    checkoutBtn.addEventListener('click', async () => {
       if (!currentUser) {
         showToast("Please login to checkout", 1500);
         openAccountModal();
         return;
       }
       if (cart.length === 0) { showToast("Your cart is empty. Add some delicious items first!", 1500); return; }
+      
       const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-      let creditUsed = 0;
       const userBalance = currentUser.balance || 0;
-      if (userBalance > 0 && total > 0) {
-        creditUsed = Math.min(userBalance, total);
-        currentUser.balance = userBalance - creditUsed;
-        saveUserCredit();
-        showToast(`✨ Order placed! Used ₱${creditUsed} credit. Remaining balance: ₱${currentUser.balance}`, 2500);
-      } else { showToast("✨ Order placed! Thank you for shopping at NOVA.", 2000); }
-      cart = [];
-      updateCartBadge();
-      saveCartToLocal();
-      renderCartUI();
-      closeDrawer();
+      
+      if (userBalance >= total) {
+        try {
+          const formData = new URLSearchParams();
+          formData.append("action", "updateBalance");
+          formData.append("phone", currentUser.phone);
+          formData.append("amount", total);
+          formData.append("operation", "deduct");
+          
+          const response = await fetch(GOOGLE_SHEETS_URL, {
+            method: "POST",
+            body: formData
+          });
+          
+          const result = await response.json();
+          
+          if (result.success) {
+            currentUser.balance = result.newBalance;
+            localStorage.setItem("nova_user", JSON.stringify(currentUser));
+            showToast(`✨ Order placed! Used ₱${total} credit. Remaining balance: ₱${currentUser.balance}`, 2500);
+            
+            cart = [];
+            updateCartBadge();
+            saveCartToLocal();
+            renderCartUI();
+            closeDrawer();
+          } else {
+            showToast(result.message || "Checkout failed", 1500);
+          }
+        } catch (error) {
+          console.error("Checkout error:", error);
+          showToast("Checkout failed. Please try again.", 1500);
+        }
+      } else {
+        showToast(`Insufficient balance! You have ₱${userBalance}, need ₱${total}`, 2000);
+      }
     });
   }
 }
@@ -648,23 +717,41 @@ function subscribeNewsletter() {
 }
 
 // ========================================
+// TEST LOGIN FUNCTION
+// ========================================
+function testLoginWithPhone(phone, password) {
+  console.log("Testing login with:", phone, password);
+  fetch(`${GOOGLE_SHEETS_URL}?action=getUsers`)
+    .then(res => res.json())
+    .then(users => {
+      const user = users.find(u => {
+        const sheetPhone = u.phone.toString();
+        const inputPhone = phone.toString();
+        if (sheetPhone === inputPhone) return true;
+        if (inputPhone.startsWith('09') && sheetPhone === inputPhone.substring(1)) return true;
+        if (sheetPhone.startsWith('09') && inputPhone === sheetPhone.substring(1)) return true;
+        return false;
+      });
+      if (user) {
+        console.log("✅ Login would work!", user);
+        alert(`Login would work! User: ${user.name}`);
+      } else {
+        console.log("❌ Login would fail");
+        alert("Login would fail. Check console for available users.");
+      }
+    });
+}
+
+// ========================================
 // INITIALIZATION
 // ========================================
 function init() {
   console.log("Initializing NOVA e-commerce app...");
   
-  // Load user from localStorage
   const savedUser = localStorage.getItem("nova_user");
   if (savedUser) {
     try {
       currentUser = JSON.parse(savedUser);
-      // Load credit from localStorage
-      const savedCredit = localStorage.getItem(`nova_credit_${currentUser.phone}`);
-      if (savedCredit) {
-        currentUser.balance = parseInt(savedCredit);
-      } else if (!currentUser.balance) {
-        currentUser.balance = 0;
-      }
       document.getElementById("userNameDisplay").innerText = currentUser.name.split(' ')[0];
     } catch(e) { currentUser = null; }
   }
@@ -685,7 +772,6 @@ function init() {
   initContactForm();
   initAccountIcon();
   
-  // Make functions globally available
   window.switchPage = switchPage;
   window.addToCart = addToCart;
   window.redeemCode = redeemCode;
@@ -702,6 +788,7 @@ function init() {
   window.handleLogin = handleLogin;
   window.handleRegister = handleRegister;
   window.logout = logout;
+  window.testLoginWithPhone = testLoginWithPhone;
 }
 
 document.addEventListener('DOMContentLoaded', init);

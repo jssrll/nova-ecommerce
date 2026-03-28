@@ -50,3 +50,18 @@ Technologies Used:
 - Chart.js for investment charts
 - Font Awesome Icons
 - Google Fonts (Inter)
+
+
+Push to GitHub
+cd C:\Users\ASUS\OneDrive\Ecommerce\nova-ecommerce
+git add js/app.js
+git commit -m "Fixed login with phone number format handling"
+git push
+
+
+Redeploy to Vercel
+cd C:\Users\ASUS\OneDrive\Ecommerce\nova-ecommerce
+git add .
+git commit -m "Updated login to handle multiple phone formats"
+git push
+vercel --prod
