@@ -116,13 +116,29 @@ async function handleLogin(event) {
     console.log("Available users:", users);
     console.log("Trying to login with phone:", phone, "password:", password);
     
+    // Try to find user with flexible phone number matching
     const user = users.find(u => {
       const sheetPhone = u.phone.toString();
       const inputPhone = phone.toString();
       
+      console.log("Comparing:", sheetPhone, "vs", inputPhone);
+      
+      // Exact match
       if (sheetPhone === inputPhone) return true;
+      
+      // If input starts with 09 and sheet doesn't have 0 prefix
       if (inputPhone.startsWith('09') && sheetPhone === inputPhone.substring(1)) return true;
+      
+      // If sheet starts with 09 and input doesn't have 0 prefix
       if (sheetPhone.startsWith('09') && inputPhone === sheetPhone.substring(1)) return true;
+      
+      // If input has +63 prefix
+      if (inputPhone.startsWith('+63') && sheetPhone === inputPhone.substring(3)) return true;
+      if (inputPhone.startsWith('+63') && sheetPhone === '0' + inputPhone.substring(3)) return true;
+      
+      // If sheet has +63 prefix
+      if (sheetPhone.startsWith('+63') && inputPhone === sheetPhone.substring(3)) return true;
+      if (sheetPhone.startsWith('+63') && inputPhone === '0' + sheetPhone.substring(3)) return true;
       
       return false;
     });
@@ -324,9 +340,12 @@ async function placeOrder() {
     return false;
   }
   
+  // Create order list string
   const orderList = cart.map(item => `${item.name} x${item.quantity} (₱${item.price * item.quantity})`).join(", ");
   
   try {
+    // First, deduct balance
+    console.log("Deducting balance...");
     const balanceData = new URLSearchParams();
     balanceData.append("action", "updateBalance");
     balanceData.append("phone", currentUser.phone);
@@ -346,6 +365,8 @@ async function placeOrder() {
       return false;
     }
     
+    // Save order to Google Sheets
+    console.log("Saving order...");
     const orderData = new URLSearchParams();
     orderData.append("action", "addOrder");
     orderData.append("timestamp", new Date().toISOString());
@@ -365,9 +386,11 @@ async function placeOrder() {
     console.log("Order save result:", orderResult);
     
     if (orderResult.success) {
+      // Update local user balance
       currentUser.balance = balanceResult.newBalance;
       localStorage.setItem("nova_user", JSON.stringify(currentUser));
       
+      // Clear cart
       cart = [];
       updateCartBadge();
       saveCartToLocal();
@@ -376,6 +399,8 @@ async function placeOrder() {
       showToast(`✅ Order placed successfully! Total: ₱${total}. Remaining balance: ₱${currentUser.balance}`, 3000);
       return true;
     } else {
+      // Refund if order save fails
+      console.log("Order save failed, refunding...");
       const refundData = new URLSearchParams();
       refundData.append("action", "updateBalance");
       refundData.append("phone", currentUser.phone);
@@ -811,66 +836,6 @@ function initAccountIcon() {
 }
 
 // ========================================
-// SIDEBAR MENU FUNCTIONS - No Swipe, Only Button Click
-// ========================================
-function initHamburgerMenu() {
-  const hamburger = document.getElementById('hamburgerBtn');
-  const navLinks = document.getElementById('navLinks');
-  
-  if (!hamburger || !navLinks) return;
-  
-  // Create overlay element if it doesn't exist
-  let overlay = document.querySelector('.menu-overlay');
-  if (!overlay) {
-    overlay = document.createElement('div');
-    overlay.className = 'menu-overlay';
-    document.body.appendChild(overlay);
-  }
-  
-  function closeMenu() {
-    hamburger.classList.remove('active');
-    navLinks.classList.remove('active');
-    overlay.classList.remove('active');
-    document.body.style.overflow = '';
-  }
-  
-  function openMenu() {
-    hamburger.classList.add('active');
-    navLinks.classList.add('active');
-    overlay.classList.add('active');
-    document.body.style.overflow = 'hidden';
-  }
-  
-  // ONLY open/close on button click - no swipe detection
-  hamburger.addEventListener('click', (e) => {
-    e.stopPropagation();
-    if (navLinks.classList.contains('active')) {
-      closeMenu();
-    } else {
-      openMenu();
-    }
-  });
-  
-  // Close menu when clicking on overlay
-  overlay.addEventListener('click', closeMenu);
-  
-  // Close menu when clicking on a nav link
-  const navItems = navLinks.querySelectorAll('a');
-  navItems.forEach(link => {
-    link.addEventListener('click', () => {
-      closeMenu();
-    });
-  });
-  
-  // Close menu on window resize (if switching to desktop)
-  window.addEventListener('resize', () => {
-    if (window.innerWidth > 768 && navLinks.classList.contains('active')) {
-      closeMenu();
-    }
-  });
-}
-
-// ========================================
 // NEWSLETTER
 // ========================================
 function subscribeNewsletter() {
@@ -938,7 +903,6 @@ function init() {
   initCartDrawer();
   initContactForm();
   initAccountIcon();
-  initHamburgerMenu();
   
   window.switchPage = switchPage;
   window.addToCart = addToCart;
