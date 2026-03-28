@@ -811,7 +811,7 @@ function initAccountIcon() {
 }
 
 // ========================================
-// HAMBURGER MENU - SIMPLE WORKING VERSION
+// SIDEBAR MENU FUNCTIONS - No Swipe, Only Button Click
 // ========================================
 function initHamburgerMenu() {
   const hamburger = document.getElementById('hamburgerBtn');
@@ -819,17 +819,29 @@ function initHamburgerMenu() {
   
   if (!hamburger || !navLinks) return;
   
+  // Create overlay element if it doesn't exist
+  let overlay = document.querySelector('.menu-overlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.className = 'menu-overlay';
+    document.body.appendChild(overlay);
+  }
+  
   function closeMenu() {
     hamburger.classList.remove('active');
     navLinks.classList.remove('active');
+    overlay.classList.remove('active');
+    document.body.style.overflow = '';
   }
   
   function openMenu() {
     hamburger.classList.add('active');
     navLinks.classList.add('active');
+    overlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
   }
   
-  // Toggle menu on hamburger click
+  // ONLY open/close on button click - no swipe detection
   hamburger.addEventListener('click', (e) => {
     e.stopPropagation();
     if (navLinks.classList.contains('active')) {
@@ -839,7 +851,10 @@ function initHamburgerMenu() {
     }
   });
   
-  // Close menu when clicking on a nav link (navigation)
+  // Close menu when clicking on overlay
+  overlay.addEventListener('click', closeMenu);
+  
+  // Close menu when clicking on a nav link
   const navItems = navLinks.querySelectorAll('a');
   navItems.forEach(link => {
     link.addEventListener('click', () => {

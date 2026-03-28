@@ -1763,3 +1763,151 @@ footer {
 button {
   font-family: inherit;
 }
+
+/* ========================================
+   HAMBURGER MENU - SIDEBAR STYLES
+   ======================================== */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 30px;
+  height: 21px;
+  cursor: pointer;
+  margin-left: 15px;
+  z-index: 1001;
+  position: relative;
+}
+
+.hamburger span {
+  display: block;
+  height: 3px;
+  width: 100%;
+  background-color: #1d1d1f;
+  border-radius: 3px;
+  transition: all 0.3s ease;
+}
+
+.hamburger.active span:nth-child(1) {
+  transform: translateY(9px) rotate(45deg);
+}
+
+.hamburger.active span:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger.active span:nth-child(3) {
+  transform: translateY(-9px) rotate(-45deg);
+}
+
+/* Mobile Navigation - Sidebar Menu */
+@media (max-width: 768px) {
+  .hamburger {
+    display: flex;
+  }
+  
+  /* Prevent horizontal scroll/swipe on body when menu is closed */
+  body {
+    overflow-x: hidden;
+    position: relative;
+  }
+  
+  /* Sidebar Menu - Hidden by default, no swipe */
+  .nav-links {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 280px;
+    height: 100vh;
+    background: white;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap: 0;
+    transition: right 0.3s ease;
+    z-index: 1000;
+    box-shadow: -2px 0 20px rgba(0, 0, 0, 0.1);
+    padding: 80px 24px 24px 24px;
+    margin: 0;
+    overflow-y: auto;
+    /* Prevent swipe to open */
+    touch-action: pan-y;
+  }
+  
+  /* Menu open state - only triggered by button click */
+  .nav-links.active {
+    right: 0;
+  }
+  
+  .nav-links a {
+    font-size: 1.1rem;
+    padding: 15px 0;
+    width: 100%;
+    text-align: left;
+    border-bottom: 1px solid #f0f0f0;
+    text-decoration: none;
+    color: #1d1d1f;
+    transition: 0.2s;
+  }
+  
+  .nav-links a:hover,
+  .nav-links a.active {
+    color: #e63946;
+    padding-left: 8px;
+  }
+  
+  .nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-left: auto;
+    z-index: 1001;
+  }
+  
+  /* Add overlay when menu is open (optional, prevents clicking outside) */
+  .menu-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    display: none;
+    cursor: pointer;
+  }
+  
+  .menu-overlay.active {
+    display: block;
+  }
+}
+
+/* Desktop Navigation */
+@media (min-width: 769px) {
+  .nav-links {
+    display: flex;
+    position: static;
+    flex-direction: row;
+    width: auto;
+    height: auto;
+    background: transparent;
+    box-shadow: none;
+    padding: 0;
+    gap: 32px;
+  }
+  
+  .nav-links a {
+    font-size: 0.9rem;
+    padding: 0;
+    width: auto;
+    border-bottom: none;
+  }
+  
+  .hamburger {
+    display: none !important;
+  }
+  
+  .menu-overlay {
+    display: none !important;
+  }
+}
