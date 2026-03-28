@@ -120,13 +120,8 @@ async function handleLogin(event) {
       const sheetPhone = u.phone.toString();
       const inputPhone = phone.toString();
       
-      // Exact match
       if (sheetPhone === inputPhone) return true;
-      
-      // If input starts with 09 and sheet doesn't have 0 prefix
       if (inputPhone.startsWith('09') && sheetPhone === inputPhone.substring(1)) return true;
-      
-      // If sheet starts with 09 and input doesn't have 0 prefix
       if (sheetPhone.startsWith('09') && inputPhone === sheetPhone.substring(1)) return true;
       
       return false;
@@ -824,6 +819,7 @@ function initHamburgerMenu() {
   
   if (!hamburger || !navLinks) return;
   
+  // Create overlay element if it doesn't exist
   let overlay = document.querySelector('.menu-overlay');
   if (!overlay) {
     overlay = document.createElement('div');
@@ -845,6 +841,7 @@ function initHamburgerMenu() {
     document.body.style.overflow = 'hidden';
   }
   
+  // Toggle menu on hamburger click
   hamburger.addEventListener('click', (e) => {
     e.stopPropagation();
     if (navLinks.classList.contains('active')) {
@@ -854,20 +851,33 @@ function initHamburgerMenu() {
     }
   });
   
+  // Close menu when clicking on overlay
   overlay.addEventListener('click', closeMenu);
   
+  // Close menu when clicking on a nav link (navigation)
   const navItems = navLinks.querySelectorAll('a');
   navItems.forEach(link => {
     link.addEventListener('click', () => {
-      closeMenu();
+      // Small delay to ensure the page navigation happens after menu closes
+      setTimeout(() => {
+        closeMenu();
+      }, 100);
     });
   });
   
+  // Close menu on window resize (if switching to desktop)
   window.addEventListener('resize', () => {
     if (window.innerWidth > 768 && navLinks.classList.contains('active')) {
       closeMenu();
     }
   });
+  
+  // Prevent body scroll when menu is open
+  document.addEventListener('touchmove', function(e) {
+    if (navLinks.classList.contains('active') && !navLinks.contains(e.target)) {
+      e.preventDefault();
+    }
+  }, { passive: false });
 }
 
 // ========================================
