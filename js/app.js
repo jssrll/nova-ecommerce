@@ -811,7 +811,7 @@ function initAccountIcon() {
 }
 
 // ========================================
-// HAMBURGER MENU FUNCTIONS (Simplified - No Overlay)
+// HAMBURGER MENU FUNCTIONS - WITH OVERLAY MODAL STYLE
 // ========================================
 function initHamburgerMenu() {
   const hamburger = document.getElementById('hamburgerBtn');
@@ -819,14 +819,26 @@ function initHamburgerMenu() {
   
   if (!hamburger || !navLinks) return;
   
+  // Create overlay element
+  let overlay = document.querySelector('.menu-overlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.className = 'menu-overlay';
+    document.body.appendChild(overlay);
+  }
+  
   function closeMenu() {
     hamburger.classList.remove('active');
     navLinks.classList.remove('active');
+    overlay.classList.remove('active');
+    document.body.classList.remove('menu-open');
   }
   
   function openMenu() {
     hamburger.classList.add('active');
     navLinks.classList.add('active');
+    overlay.classList.add('active');
+    document.body.classList.add('menu-open');
   }
   
   // Toggle menu on hamburger click
@@ -839,7 +851,10 @@ function initHamburgerMenu() {
     }
   });
   
-  // Close menu when clicking on a nav link (navigation)
+  // Close menu when clicking on overlay
+  overlay.addEventListener('click', closeMenu);
+  
+  // Close menu when clicking on a nav link
   const navItems = navLinks.querySelectorAll('a');
   navItems.forEach(link => {
     link.addEventListener('click', () => {
