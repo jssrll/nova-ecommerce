@@ -93,7 +93,7 @@ function switchTab(tabName) {
 }
 
 // ========================================
-// LOGIN WITH PHONE NUMBER FIX (Option 3)
+// LOGIN WITH PHONE NUMBER FIX
 // ========================================
 async function handleLogin(event) {
   event.preventDefault();
@@ -313,6 +313,178 @@ async function addUserCredit(amount) {
 }
 
 // ========================================
+// ORDERS FUNCTIONS
+// ========================================
+async function placeOrder() {
+  if (!currentUser) {
+    showToast("Please login to place order", 1500);
+    openAccountModal();
+    return false;
+  }
+  
+  if (cart.length === 0) {
+    showToast("Your cart is empty. Add some items first!", 1500);
+    return false;
+  }
+  
+  const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const userBalance = currentUser.balance || 0;
+  
+  console.log("Placing order...");
+  console.log("Total:", total);
+  console.log("User Balance:", userBalance);
+  console.log("Cart items:", cart);
+  
+  if (userBalance < total) {
+    showToast(`Insufficient balance! You have ₱${userBalance}, need ₱${total}`, 2000);
+    return false;
+  }
+  
+  // Create order list string
+  const orderList = cart.map(item => `${item.name} x${item.quantity} (₱${item.price * item.quantity})`).join(", ");
+  
+  try {
+    // First, deduct balance
+    console.log("Deducting balance...");
+    const balanceData = new URLSearchParams();
+    balanceData.append("action", "updateBalance");
+    balanceData.append("phone", currentUser.phone);
+    balanceData.append("amount", total);
+    balanceData.append("operation", "deduct");
+    
+    const balanceResponse = await fetch(GOOGLE_SHEETS_URL, {
+      method: "POST",
+      body: balanceData
+    });
+    
+    const balanceResult = await balanceResponse.json();
+    console.log("Balance update result:", balanceResult);
+    
+    if (!balanceResult.success) {
+      showToast(balanceResult.message || "Failed to process payment", 1500);
+      return false;
+    }
+    
+    // Save order to Google Sheets
+    console.log("Saving order...");
+    const orderData = new URLSearchParams();
+    orderData.append("action", "addOrder");
+    orderData.append("timestamp", new Date().toISOString());
+    orderData.append("fullName", currentUser.name);
+    orderData.append("accountId", currentUser.id);
+    orderData.append("phone", currentUser.phone);
+    orderData.append("orderList", orderList);
+    orderData.append("totalPrice", total);
+    orderData.append("status", "Pending");
+    
+    const orderResponse = await fetch(GOOGLE_SHEETS_URL, {
+      method: "POST",
+      body: orderData
+    });
+    
+    const orderResult = await orderResponse.json();
+    console.log("Order save result:", orderResult);
+    
+    if (orderResult.success) {
+      // Update local user balance
+      currentUser.balance = balanceResult.newBalance;
+      localStorage.setItem("nova_user", JSON.stringify(currentUser));
+      
+      // Clear cart
+      cart = [];
+      updateCartBadge();
+      saveCartToLocal();
+      renderCartUI();
+      
+      showToast(`✅ Order placed successfully! Total: ₱${total}. Remaining balance: ₱${currentUser.balance}`, 3000);
+      return true;
+    } else {
+      // Refund if order save fails
+      console.log("Order save failed, refunding...");
+      const refundData = new URLSearchParams();
+      refundData.append("action", "updateBalance");
+      refundData.append("phone", currentUser.phone);
+      refundData.append("amount", total);
+      refundData.append("operation", "add");
+      await fetch(GOOGLE_SHEETS_URL, { method: "POST", body: refundData });
+      
+      showToast(orderResult.message || "Order failed. Please try again.", 1500);
+      return false;
+    }
+  } catch (error) {
+    console.error("Order error:", error);
+    showToast("Order failed. Please try again.", 1500);
+    return false;
+  }
+}
+
+async function loadUserOrders() {
+  if (!currentUser) {
+    return;
+  }
+  
+  const ordersContainer = document.getElementById("ordersContainer");
+  if (!ordersContainer) return;
+  
+  ordersContainer.innerHTML = '<div style="text-align: center; padding: 40px;"><i class="fas fa-spinner fa-spin"></i> Loading orders...</div>';
+  
+  try {
+    const formData = new URLSearchParams();
+    formData.append("action", "getUserOrders");
+    formData.append("phone", currentUser.phone);
+    
+    const response = await fetch(GOOGLE_SHEETS_URL, {
+      method: "POST",
+      body: formData
+    });
+    
+    const orders = await response.json();
+    console.log("Orders loaded:", orders);
+    
+    if (orders.length === 0) {
+      ordersContainer.innerHTML = `
+        <div class="empty-orders">
+          <i class="fas fa-receipt" style="font-size: 4rem; color: #e63946; margin-bottom: 20px;"></i>
+          <p>No orders yet. Start shopping!</p>
+          <button class="btn-primary-apple" onclick="switchPage('shop')" style="margin-top: 20px;">Shop Now</button>
+        </div>
+      `;
+      return;
+    }
+    
+    ordersContainer.innerHTML = orders.map(order => `
+      <div class="order-card">
+        <div class="order-header">
+          <span class="order-date">📅 ${new Date(order.timestamp).toLocaleString()}</span>
+          <span class="order-status status-${order.status.toLowerCase()}">${order.status}</span>
+        </div>
+        <div class="order-items">
+          ${order.orderList.split(', ').map(item => {
+            const parts = item.split(' (₱');
+            return `<div class="order-item">
+              <span class="order-item-name">${parts[0]}</span>
+            </div>`;
+          }).join('')}
+        </div>
+        <div class="order-total">
+          <span>Total:</span>
+          <span>₱${parseFloat(order.totalPrice).toLocaleString()}</span>
+        </div>
+      </div>
+    `).reverse().join('');
+    
+  } catch (error) {
+    console.error("Load orders error:", error);
+    ordersContainer.innerHTML = `
+      <div class="empty-orders">
+        <i class="fas fa-exclamation-circle" style="font-size: 4rem; color: #e63946; margin-bottom: 20px;"></i>
+        <p>Failed to load orders. Please try again.</p>
+      </div>
+    `;
+  }
+}
+
+// ========================================
 // PAGE NAVIGATION
 // ========================================
 function switchPage(pageName) {
@@ -326,6 +498,7 @@ function switchPage(pageName) {
   currentPage = pageName;
   if (pageName === 'featured') loadFeaturedPage();
   else if (pageName === 'shop') renderProducts();
+  else if (pageName === 'orders') loadUserOrders();
 }
 
 // ========================================
@@ -638,50 +811,9 @@ function initCartDrawer() {
   
   if (checkoutBtn) {
     checkoutBtn.addEventListener('click', async () => {
-      if (!currentUser) {
-        showToast("Please login to checkout", 1500);
-        openAccountModal();
-        return;
-      }
-      if (cart.length === 0) { showToast("Your cart is empty. Add some delicious items first!", 1500); return; }
-      
-      const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-      const userBalance = currentUser.balance || 0;
-      
-      if (userBalance >= total) {
-        try {
-          const formData = new URLSearchParams();
-          formData.append("action", "updateBalance");
-          formData.append("phone", currentUser.phone);
-          formData.append("amount", total);
-          formData.append("operation", "deduct");
-          
-          const response = await fetch(GOOGLE_SHEETS_URL, {
-            method: "POST",
-            body: formData
-          });
-          
-          const result = await response.json();
-          
-          if (result.success) {
-            currentUser.balance = result.newBalance;
-            localStorage.setItem("nova_user", JSON.stringify(currentUser));
-            showToast(`✨ Order placed! Used ₱${total} credit. Remaining balance: ₱${currentUser.balance}`, 2500);
-            
-            cart = [];
-            updateCartBadge();
-            saveCartToLocal();
-            renderCartUI();
-            closeDrawer();
-          } else {
-            showToast(result.message || "Checkout failed", 1500);
-          }
-        } catch (error) {
-          console.error("Checkout error:", error);
-          showToast("Checkout failed. Please try again.", 1500);
-        }
-      } else {
-        showToast(`Insufficient balance! You have ₱${userBalance}, need ₱${total}`, 2000);
+      const success = await placeOrder();
+      if (success) {
+        closeDrawer();
       }
     });
   }
