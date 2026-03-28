@@ -8,7 +8,7 @@ let currentPage = "home";
 let currentUser = null;
 
 // Your Google Sheets Web App URL
-const GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbwFUkVGaNon2nys2zGWhiVe0Mwi3oSw8dU9sUs18BeSGU3Yi1a24WHjhZboi0nIkpPxEA/exec";
+const GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbwd9WXCZ3e6mMWakTL5d7sauQQAZtKFELiy4BNxFhB0-lAJO1DzCnKyXQ9ecxy8mATKcA/exec";
 
 // ========================================
 // HELPER FUNCTIONS
