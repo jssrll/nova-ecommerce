@@ -137,7 +137,147 @@ body {
 }
 
 /* ========================================
-   HOME PAGE - APPLE STYLES (FULLY RESPONSIVE)
+   HAMBURGER MENU STYLES - LIKE MODAL
+   ======================================== */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 30px;
+  height: 21px;
+  cursor: pointer;
+  margin-left: 15px;
+  z-index: 1001;
+  position: relative;
+}
+
+.hamburger span {
+  display: block;
+  height: 3px;
+  width: 100%;
+  background-color: #1d1d1f;
+  border-radius: 3px;
+  transition: all 0.3s ease;
+}
+
+.hamburger.active span:nth-child(1) {
+  transform: translateY(9px) rotate(45deg);
+}
+
+.hamburger.active span:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger.active span:nth-child(3) {
+  transform: translateY(-9px) rotate(-45deg);
+}
+
+/* Mobile Navigation - Hidden by default, shows like modal */
+@media (max-width: 768px) {
+  .hamburger {
+    display: flex;
+  }
+  
+  /* Navigation overlay - full screen background */
+  .nav-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    z-index: 999;
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+  }
+  
+  .nav-overlay.active {
+    visibility: visible;
+    opacity: 1;
+  }
+  
+  /* Menu panel - slides from right */
+  .nav-links {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 280px;
+    height: 100vh;
+    background: white;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap: 0;
+    transition: right 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+    z-index: 1000;
+    box-shadow: -2px 0 20px rgba(0, 0, 0, 0.1);
+    padding: 80px 24px 24px 24px;
+    margin: 0;
+    overflow-y: auto;
+  }
+  
+  .nav-links.active {
+    right: 0;
+  }
+  
+  .nav-links a {
+    font-size: 1.1rem;
+    padding: 15px 0;
+    width: 100%;
+    text-align: left;
+    border-bottom: 1px solid #f0f0f0;
+    text-decoration: none;
+    color: #1d1d1f;
+  }
+  
+  .nav-links a:hover,
+  .nav-links a.active {
+    color: #e63946;
+  }
+  
+  .nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-left: auto;
+    z-index: 1001;
+  }
+}
+
+/* Desktop Navigation */
+@media (min-width: 769px) {
+  .nav-links {
+    display: flex;
+    position: static;
+    flex-direction: row;
+    width: auto;
+    height: auto;
+    background: transparent;
+    box-shadow: none;
+    padding: 0;
+    gap: 32px;
+  }
+  
+  .nav-links a {
+    font-size: 0.9rem;
+    padding: 0;
+    width: auto;
+    border-bottom: none;
+  }
+  
+  .hamburger {
+    display: none !important;
+  }
+  
+  .nav-overlay {
+    display: none !important;
+  }
+}
+
+/* ========================================
+   HOME PAGE - FULLY RESPONSIVE
    ======================================== */
 .hero-apple {
   background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
@@ -1188,121 +1328,6 @@ body {
 }
 
 /* ========================================
-   HAMBURGER MENU STYLES (FIXED)
-   ======================================== */
-.hamburger {
-  display: none;
-  flex-direction: column;
-  justify-content: space-between;
-  width: 30px;
-  height: 21px;
-  cursor: pointer;
-  margin-left: 15px;
-  z-index: 1001;
-}
-
-.hamburger span {
-  display: block;
-  height: 3px;
-  width: 100%;
-  background-color: #1d1d1f;
-  border-radius: 3px;
-  transition: all 0.3s ease;
-}
-
-.hamburger.active span:nth-child(1) {
-  transform: translateY(9px) rotate(45deg);
-}
-
-.hamburger.active span:nth-child(2) {
-  opacity: 0;
-}
-
-.hamburger.active span:nth-child(3) {
-  transform: translateY(-9px) rotate(-45deg);
-}
-
-/* Mobile Navigation - Fixed */
-@media (max-width: 768px) {
-  .hamburger {
-    display: flex;
-  }
-  
-  .nav-links {
-    position: fixed;
-    top: 0;
-    right: -100%;
-    width: 280px;
-    height: 100vh;
-    background: white;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: flex-start;
-    gap: 0;
-    transition: right 0.3s ease;
-    z-index: 1000;
-    box-shadow: -2px 0 20px rgba(0, 0, 0, 0.1);
-    padding: 80px 24px 24px 24px;
-    margin: 0;
-    overflow-y: auto;
-  }
-  
-  .nav-links.active {
-    right: 0;
-    left: auto;
-  }
-  
-  .nav-links a {
-    font-size: 1.1rem;
-    padding: 15px 0;
-    width: 100%;
-    text-align: left;
-    border-bottom: 1px solid #f0f0f0;
-    text-decoration: none;
-    color: #1d1d1f;
-  }
-  
-  .nav-links a:hover,
-  .nav-links a.active {
-    color: #e63946;
-  }
-  
-  .nav-actions {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    margin-left: auto;
-    z-index: 1001;
-  }
-}
-
-/* Desktop Navigation */
-@media (min-width: 769px) {
-  .nav-links {
-    display: flex;
-    position: static;
-    flex-direction: row;
-    width: auto;
-    height: auto;
-    background: transparent;
-    box-shadow: none;
-    padding: 0;
-    gap: 32px;
-  }
-  
-  .nav-links a {
-    font-size: 0.9rem;
-    padding: 0;
-    width: auto;
-    border-bottom: none;
-  }
-  
-  .hamburger {
-    display: none !important;
-  }
-}
-
-/* ========================================
    CART SIDEBAR - RESPONSIVE
    ======================================== */
 .cart-overlay {
@@ -1766,15 +1791,4 @@ footer {
 
 button {
   font-family: inherit;
-}
-
-/* Finance Page - Hidden (Not Used) */
-.finance-dashboard-apple,
-.investment-summary-apple,
-.investment-chart-apple,
-.bond-products-apple,
-.bond-grid-apple,
-.bond-card-apple,
-.invest-btn-apple {
-  display: none;
 }
