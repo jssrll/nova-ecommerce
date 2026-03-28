@@ -1573,30 +1573,13 @@ button:disabled {
     width: 100%;
     text-align: left;
     border-bottom: 1px solid #f0f0f0;
+    text-decoration: none;
+    color: #1d1d1f;
   }
   
   .nav-links a:hover,
   .nav-links a.active {
     color: #e63946;
-    background: transparent;
-    padding-left: 8px;
-  }
-  
-  /* Overlay background when menu is open */
-  .menu-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 999;
-    display: none;
-    cursor: pointer;
-  }
-  
-  .menu-overlay.active {
-    display: block;
   }
   
   .nav-actions {
@@ -1605,7 +1588,7 @@ button:disabled {
   }
 }
 
-/* Desktop Navigation - Keep as is */
+/* Desktop Navigation */
 @media (min-width: 769px) {
   .nav-links {
     display: flex;
@@ -1624,15 +1607,5 @@ button:disabled {
     padding: 0;
     width: auto;
     border-bottom: none;
-  }
-  
-  .nav-links a:hover,
-  .nav-links a.active {
-    color: #e63946;
-    padding-left: 0;
-  }
-  
-  .menu-overlay {
-    display: none !important;
   }
 }

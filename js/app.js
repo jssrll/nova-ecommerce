@@ -811,7 +811,7 @@ function initAccountIcon() {
 }
 
 // ========================================
-// HAMBURGER MENU FUNCTIONS
+// HAMBURGER MENU FUNCTIONS (Simplified - No Overlay)
 // ========================================
 function initHamburgerMenu() {
   const hamburger = document.getElementById('hamburgerBtn');
@@ -819,26 +819,14 @@ function initHamburgerMenu() {
   
   if (!hamburger || !navLinks) return;
   
-  // Create overlay element if it doesn't exist
-  let overlay = document.querySelector('.menu-overlay');
-  if (!overlay) {
-    overlay = document.createElement('div');
-    overlay.className = 'menu-overlay';
-    document.body.appendChild(overlay);
-  }
-  
   function closeMenu() {
     hamburger.classList.remove('active');
     navLinks.classList.remove('active');
-    overlay.classList.remove('active');
-    document.body.style.overflow = '';
   }
   
   function openMenu() {
     hamburger.classList.add('active');
     navLinks.classList.add('active');
-    overlay.classList.add('active');
-    document.body.style.overflow = 'hidden';
   }
   
   // Toggle menu on hamburger click
@@ -851,17 +839,11 @@ function initHamburgerMenu() {
     }
   });
   
-  // Close menu when clicking on overlay
-  overlay.addEventListener('click', closeMenu);
-  
   // Close menu when clicking on a nav link (navigation)
   const navItems = navLinks.querySelectorAll('a');
   navItems.forEach(link => {
     link.addEventListener('click', () => {
-      // Small delay to ensure the page navigation happens after menu closes
-      setTimeout(() => {
-        closeMenu();
-      }, 100);
+      closeMenu();
     });
   });
   
@@ -871,13 +853,6 @@ function initHamburgerMenu() {
       closeMenu();
     }
   });
-  
-  // Prevent body scroll when menu is open
-  document.addEventListener('touchmove', function(e) {
-    if (navLinks.classList.contains('active') && !navLinks.contains(e.target)) {
-      e.preventDefault();
-    }
-  }, { passive: false });
 }
 
 // ========================================
@@ -948,7 +923,7 @@ function init() {
   initCartDrawer();
   initContactForm();
   initAccountIcon();
-  initHamburgerMenu(); // Add hamburger menu initialization
+  initHamburgerMenu();
   
   window.switchPage = switchPage;
   window.addToCart = addToCart;
