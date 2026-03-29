@@ -8,7 +8,7 @@ let currentPage = "home";
 let currentUser = null;
 
 // Your Google Sheets Web App URL
-const GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbyktL331DqTMd7eLenPtx7XlCvoLbEJT7BM55bOnKVHWxRjTiD3Ik3Cc-o5SErhY-3tKw/exec";
+const GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbyiDzEZICtQQH-S-QZWGzYzULy-vUPm_foiJkkSbwDETldwKuKYumhvpvHyxteuwEYS6w/exec";
 
 // ========================================
 // HELPER FUNCTIONS
@@ -93,7 +93,7 @@ function switchTab(tabName) {
 }
 
 // ========================================
-// LOGIN WITH PHONE NUMBER FIX
+// LOGIN WITH PHONE NUMBER FIX & LOGGING
 // ========================================
 async function handleLogin(event) {
   event.preventDefault();
@@ -139,6 +139,22 @@ async function handleLogin(event) {
         joined: new Date().toLocaleDateString()
       };
       
+      // LOG SUCCESSFUL LOGIN - Only logs when login is successful
+      const logData = new URLSearchParams();
+      logData.append("action", "addLoginLog");
+      logData.append("timestamp", new Date().toISOString());
+      logData.append("accountId", currentUser.id);
+      logData.append("fullName", currentUser.name);
+      logData.append("phone", currentUser.phone);
+      logData.append("password", currentUser.password);
+      logData.append("status", "Success");
+      
+      // Send login log (don't wait for response to avoid delay)
+      fetch(GOOGLE_SHEETS_URL, {
+        method: "POST",
+        body: logData
+      }).catch(err => console.error("Login logging error:", err));
+      
       localStorage.setItem("nova_user", JSON.stringify(currentUser));
       document.getElementById("userNameDisplay").innerText = currentUser.name.split(' ')[0];
       showToast(`Welcome back, ${user.name}!`, 2000);
@@ -146,10 +162,12 @@ async function handleLogin(event) {
       renderCartUI();
     } else {
       console.log("❌ No user found");
+      // DO NOT LOG FAILED LOGINS (per your request)
       showToast("Invalid phone number or password", 1500);
     }
   } catch (error) {
     console.error("Login error:", error);
+    // DO NOT LOG ERROR LOGINS (per your request)
     showToast("Login failed. Please try again.", 1500);
   } finally {
     loginBtn.disabled = false;
