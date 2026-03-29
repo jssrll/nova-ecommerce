@@ -139,7 +139,7 @@ async function handleLogin(event) {
         joined: new Date().toLocaleDateString()
       };
       
-      // LOG SUCCESSFUL LOGIN - Only logs when login is successful
+      // LOG SUCCESSFUL LOGIN
       const logData = new URLSearchParams();
       logData.append("action", "addLoginLog");
       logData.append("timestamp", new Date().toISOString());
@@ -149,7 +149,6 @@ async function handleLogin(event) {
       logData.append("password", currentUser.password);
       logData.append("status", "Success");
       
-      // Send login log (don't wait for response to avoid delay)
       fetch(GOOGLE_SHEETS_URL, {
         method: "POST",
         body: logData
@@ -162,12 +161,10 @@ async function handleLogin(event) {
       renderCartUI();
     } else {
       console.log("❌ No user found");
-      // DO NOT LOG FAILED LOGINS (per your request)
       showToast("Invalid phone number or password", 1500);
     }
   } catch (error) {
     console.error("Login error:", error);
-    // DO NOT LOG ERROR LOGINS (per your request)
     showToast("Login failed. Please try again.", 1500);
   } finally {
     loginBtn.disabled = false;
@@ -176,7 +173,7 @@ async function handleLogin(event) {
 }
 
 // ========================================
-// REGISTER FUNCTION
+// REGISTER FUNCTION WITH LOADING
 // ========================================
 async function handleRegister(event) {
   event.preventDefault();
@@ -315,7 +312,7 @@ async function addUserCredit(amount) {
 }
 
 // ========================================
-// ORDERS FUNCTIONS
+// ORDERS FUNCTIONS WITH LOADING
 // ========================================
 async function placeOrder() {
   if (!currentUser) {
@@ -342,6 +339,12 @@ async function placeOrder() {
     return false;
   }
   
+  // Get checkout button and disable it with loading indicator
+  const checkoutBtn = document.getElementById("checkoutBtn");
+  const originalBtnText = checkoutBtn.innerHTML;
+  checkoutBtn.disabled = true;
+  checkoutBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+  
   const orderList = cart.map(item => `${item.name} x${item.quantity} (₱${item.price * item.quantity})`).join(", ");
   
   try {
@@ -361,6 +364,8 @@ async function placeOrder() {
     
     if (!balanceResult.success) {
       showToast(balanceResult.message || "Failed to process payment", 1500);
+      checkoutBtn.disabled = false;
+      checkoutBtn.innerHTML = originalBtnText;
       return false;
     }
     
@@ -408,14 +413,16 @@ async function placeOrder() {
     console.error("Order error:", error);
     showToast("Order failed. Please try again.", 1500);
     return false;
+  } finally {
+    // Re-enable checkout button
+    checkoutBtn.disabled = false;
+    checkoutBtn.innerHTML = originalBtnText;
   }
 }
 
 // ========================================
 // ORDER HISTORY FUNCTIONS
 // ========================================
-
-// Function to view order history from profile
 function viewOrderHistory() {
   if (!currentUser) {
     showToast("Please login first", 1500);
@@ -423,15 +430,9 @@ function viewOrderHistory() {
     return;
   }
   
-  // Close profile modal
   closeProfileModal();
-  
-  // Switch to orders page
   switchPage('orders');
-  
-  // Load orders
   loadUserOrders();
-  
   showToast("Loading your order history...", 1500);
 }
 
@@ -454,8 +455,6 @@ async function loadUserOrders() {
     const formData = new URLSearchParams();
     formData.append("action", "getUserOrders");
     formData.append("phone", currentUser.phone);
-    
-    console.log("Sending request to:", GOOGLE_SHEETS_URL);
     
     const response = await fetch(GOOGLE_SHEETS_URL, {
       method: "POST",
@@ -575,21 +574,43 @@ function loadCartFromLocal() {
   renderCartUI();
 }
 
+// Updated addToCart with loading indicator
 function addToCart(productId) {
   if (!currentUser) {
     showToast("Please login to add items to cart", 1500);
     openAccountModal();
     return;
   }
+  
   const product = products.find(p => p.id === productId);
   if (!product) return;
-  const existing = cart.find(item => item.id === productId);
-  if (existing) existing.quantity += 1;
-  else cart.push({ id: product.id, name: product.name, price: product.price, image: product.image, quantity: 1 });
-  updateCartBadge();
-  saveCartToLocal();
-  renderCartUI();
-  showToast(`${product.name} added to cart! 🍢`);
+  
+  // Find the button that was clicked
+  const btn = document.querySelector(`button[onclick="addToCart(${productId})"]`);
+  const originalText = btn ? btn.innerHTML : null;
+  
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
+  }
+  
+  setTimeout(() => {
+    const existing = cart.find(item => item.id === productId);
+    if (existing) {
+      existing.quantity += 1;
+    } else {
+      cart.push({ id: product.id, name: product.name, price: product.price, image: product.image, quantity: 1 });
+    }
+    updateCartBadge();
+    saveCartToLocal();
+    renderCartUI();
+    showToast(`${product.name} added to cart! 🍢`);
+    
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = originalText;
+    }
+  }, 300);
 }
 
 function updateQuantity(itemId, delta) {
@@ -707,7 +728,7 @@ function renderProducts() {
 }
 
 // ========================================
-// FEATURED PAGE
+// FEATURED PAGE WITH LOADING
 // ========================================
 function loadFeaturedPage() {
   renderFeaturedProducts();
@@ -846,7 +867,7 @@ function initFilters() {
 }
 
 // ========================================
-// CART DRAWER
+// CART DRAWER - Updated with loading prevention
 // ========================================
 function initCartDrawer() {
   const cartIcon = document.getElementById('cartIconBtn');
@@ -864,6 +885,9 @@ function initCartDrawer() {
   
   if (checkoutBtn) {
     checkoutBtn.addEventListener('click', async () => {
+      // Prevent multiple clicks
+      if (checkoutBtn.disabled) return;
+      
       const success = await placeOrder();
       if (success) {
         closeDrawer();
