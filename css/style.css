@@ -1839,3 +1839,37 @@ footer {
 button {
   font-family: inherit;
 }
+
+/* Order Status Styles */
+.status-pending {
+  background: #fff3e0;
+  color: #ff9800;
+}
+
+.status-approved {
+  background: #e3f2fd;
+  color: #2196f3;
+}
+
+.status-completed {
+  background: #e8f5e9;
+  color: #4caf50;
+}
+
+.status-cancelled {
+  background: #ffebee;
+  color: #f44336;
+}
+
+.order-history-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: 0.2s;
+}
+
+.order-history-btn:hover {
+  background: #e63946 !important;
+  transform: scale(1.02);
+}

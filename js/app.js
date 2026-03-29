@@ -8,7 +8,7 @@ let currentPage = "home";
 let currentUser = null;
 
 // Your Google Sheets Web App URL
-const GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbxKPjXQNO0MY29lYFBzRDg-V8siqPwFPNexVFLCcmHO7iCprCLO_AGkxr8iirWUhtjyBg/exec";
+const GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbyktL331DqTMd7eLenPtx7XlCvoLbEJT7BM55bOnKVHWxRjTiD3Ik3Cc-o5SErhY-3tKw/exec";
 
 // ========================================
 // HELPER FUNCTIONS
@@ -816,6 +816,125 @@ function initCartDrawer() {
         closeDrawer();
       }
     });
+  }
+}
+
+// ========================================
+// ORDER HISTORY FUNCTIONS
+// ========================================
+
+// Function to view order history from profile
+function viewOrderHistory() {
+  if (!currentUser) {
+    showToast("Please login first", 1500);
+    openAccountModal();
+    return;
+  }
+  
+  // Close profile modal
+  closeProfileModal();
+  
+  // Switch to orders page
+  switchPage('orders');
+  
+  // Load orders
+  loadUserOrders();
+  
+  showToast("Loading your order history...", 1500);
+}
+
+// Enhanced loadUserOrders function to show status badges
+async function loadUserOrders() {
+  if (!currentUser) {
+    return;
+  }
+  
+  const ordersContainer = document.getElementById("ordersContainer");
+  if (!ordersContainer) return;
+  
+  ordersContainer.innerHTML = '<div style="text-align: center; padding: 40px;"><i class="fas fa-spinner fa-spin"></i> Loading orders...</div>';
+  
+  try {
+    const formData = new URLSearchParams();
+    formData.append("action", "getUserOrders");
+    formData.append("phone", currentUser.phone);
+    
+    const response = await fetch(GOOGLE_SHEETS_URL, {
+      method: "POST",
+      body: formData
+    });
+    
+    const orders = await response.json();
+    console.log("Orders loaded:", orders);
+    
+    if (orders.length === 0) {
+      ordersContainer.innerHTML = `
+        <div class="empty-orders">
+          <i class="fas fa-receipt" style="font-size: 4rem; color: #e63946; margin-bottom: 20px;"></i>
+          <p>No orders yet. Start shopping!</p>
+          <button class="btn-primary-apple" onclick="switchPage('shop')" style="margin-top: 20px;">Shop Now</button>
+        </div>
+      `;
+      return;
+    }
+    
+    ordersContainer.innerHTML = orders.map(order => {
+      // Determine status class and icon
+      let statusClass = '';
+      let statusIcon = '';
+      
+      switch(order.status.toLowerCase()) {
+        case 'pending':
+          statusClass = 'status-pending';
+          statusIcon = '⏳';
+          break;
+        case 'approved':
+          statusClass = 'status-approved';
+          statusIcon = '✅';
+          break;
+        case 'completed':
+          statusClass = 'status-completed';
+          statusIcon = '🎉';
+          break;
+        case 'cancelled':
+          statusClass = 'status-cancelled';
+          statusIcon = '❌';
+          break;
+        default:
+          statusClass = 'status-pending';
+          statusIcon = '⏳';
+      }
+      
+      return `
+        <div class="order-card" data-timestamp="${order.timestamp}">
+          <div class="order-header">
+            <span class="order-date">📅 ${new Date(order.timestamp).toLocaleString()}</span>
+            <span class="order-status ${statusClass}">${statusIcon} ${order.status}</span>
+          </div>
+          <div class="order-items">
+            ${order.orderList.split(', ').map(item => {
+              const parts = item.split(' (₱');
+              return `<div class="order-item">
+                <span class="order-item-name">${parts[0]}</span>
+              </div>`;
+            }).join('')}
+          </div>
+          <div class="order-total">
+            <span>Total:</span>
+            <span>₱${parseFloat(order.totalPrice).toLocaleString()}</span>
+          </div>
+        </div>
+      `;
+    }).reverse().join('');
+    
+  } catch (error) {
+    console.error("Load orders error:", error);
+    ordersContainer.innerHTML = `
+      <div class="empty-orders">
+        <i class="fas fa-exclamation-circle" style="font-size: 4rem; color: #e63946; margin-bottom: 20px;"></i>
+        <p>Failed to load orders. Please try again.</p>
+      </div>
+    `;
   }
 }
 
