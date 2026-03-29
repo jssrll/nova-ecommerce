@@ -2014,3 +2014,10 @@ button {
     padding: 30px 20px;
   }
 }
+
+/* Disabled Button State */
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
