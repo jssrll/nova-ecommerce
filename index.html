@@ -20,6 +20,7 @@
         <a href="#" data-page="home" class="nav-link active">Home</a>
         <a href="#" data-page="shop" class="nav-link">Shop</a>
         <a href="#" data-page="featured" class="nav-link">Featured</a>
+        <a href="#" data-page="orders" class="nav-link">Orders</a>
         <a href="#" data-page="help" class="nav-link">Help</a>
       </div>
       <div class="nav-actions">
@@ -178,6 +179,22 @@
     <div class="featured-products-apple"><h2>Featured Items</h2><div class="featured-grid-apple" id="featuredGrid"></div></div>
   </div>
 
+  <!-- ORDERS PAGE -->
+  <div id="ordersPage" class="page">
+    <div class="page-hero">
+      <h1>My Orders</h1>
+      <p>View your order history and track status</p>
+    </div>
+    
+    <div id="ordersContainer" class="orders-container">
+      <div class="empty-orders">
+        <i class="fas fa-receipt" style="font-size: 4rem; color: #e63946; margin-bottom: 20px;"></i>
+        <p>No orders yet. Start shopping!</p>
+        <button class="btn-primary-apple" onclick="switchPage('shop')" style="margin-top: 20px;">Shop Now</button>
+      </div>
+    </div>
+  </div>
+
   <!-- HELP PAGE -->
   <div id="helpPage" class="page">
     <div class="page-hero"><h1>Customer Support</h1><p>We're here to help you 24/7. How can we assist you today?</p></div>
@@ -289,7 +306,7 @@
       </div>
       
       <!-- Order History Button -->
-      <button class="btn-primary-apple order-history-btn" onclick="viewOrderHistory()" style="width: 100%; margin-bottom: 12px; background: #1d1d1f;">
+      <button class="btn-primary-apple" onclick="viewOrderHistory()" style="width: 100%; margin-bottom: 12px; background: #1d1d1f;">
         <i class="fas fa-receipt"></i> View Order History
       </button>
       

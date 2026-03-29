@@ -1873,3 +1873,144 @@ button {
   background: #e63946 !important;
   transform: scale(1.02);
 }
+
+/* ========================================
+   ORDERS PAGE STYLES
+   ======================================== */
+.orders-container {
+  max-width: 850px;
+  margin: 0 auto 60px;
+}
+
+.order-card {
+  background: white;
+  border-radius: 20px;
+  padding: 20px;
+  margin-bottom: 16px;
+  border: 1px solid #e9e9ef;
+  transition: 0.3s;
+}
+.order-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+}
+
+.order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e9e9ef;
+}
+
+.order-date {
+  font-size: 0.8rem;
+  color: #86868b;
+}
+
+.order-status {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.status-pending {
+  background: #fff3e0;
+  color: #ff9800;
+}
+
+.status-approved {
+  background: #e3f2fd;
+  color: #2196f3;
+}
+
+.status-completed {
+  background: #e8f5e9;
+  color: #4caf50;
+}
+
+.status-cancelled {
+  background: #ffebee;
+  color: #f44336;
+}
+
+.order-items {
+  margin: 12px 0;
+}
+
+.order-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-bottom: 1px dashed #f0f0f0;
+}
+
+.order-item-name {
+  font-weight: 500;
+  font-size: 0.85rem;
+}
+
+.order-total {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid #e9e9ef;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.order-total span:first-child {
+  margin-right: 15px;
+  color: #86868b;
+}
+
+.order-total span:last-child {
+  color: #e63946;
+}
+
+.empty-orders {
+  text-align: center;
+  padding: 50px;
+  background: white;
+  border-radius: 20px;
+  border: 1px solid #e9e9ef;
+}
+
+.empty-orders i {
+  font-size: 3rem;
+  color: #e63946;
+  margin-bottom: 15px;
+}
+
+.empty-orders p {
+  color: #86868b;
+  margin-bottom: 15px;
+}
+
+/* Mobile Orders Page */
+@media (max-width: 768px) {
+  .orders-container {
+    margin: 0 auto 40px;
+    padding: 0 16px;
+  }
+  .order-card {
+    padding: 16px;
+  }
+  .order-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .order-date {
+    font-size: 0.7rem;
+  }
+  .order-total {
+    font-size: 0.9rem;
+  }
+  .empty-orders {
+    padding: 30px 20px;
+  }
+}

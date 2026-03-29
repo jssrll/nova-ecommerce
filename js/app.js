@@ -419,18 +419,25 @@ function viewOrderHistory() {
 
 async function loadUserOrders() {
   if (!currentUser) {
+    console.log("No current user");
     return;
   }
   
   const ordersContainer = document.getElementById("ordersContainer");
-  if (!ordersContainer) return;
+  if (!ordersContainer) {
+    console.log("Orders container not found!");
+    return;
+  }
   
+  console.log("Loading orders for user:", currentUser.phone);
   ordersContainer.innerHTML = '<div style="text-align: center; padding: 40px;"><i class="fas fa-spinner fa-spin"></i> Loading orders...</div>';
   
   try {
     const formData = new URLSearchParams();
     formData.append("action", "getUserOrders");
     formData.append("phone", currentUser.phone);
+    
+    console.log("Sending request to:", GOOGLE_SHEETS_URL);
     
     const response = await fetch(GOOGLE_SHEETS_URL, {
       method: "POST",
@@ -439,8 +446,9 @@ async function loadUserOrders() {
     
     const orders = await response.json();
     console.log("Orders loaded:", orders);
+    console.log("Number of orders:", orders.length);
     
-    if (orders.length === 0) {
+    if (!orders || orders.length === 0) {
       ordersContainer.innerHTML = `
         <div class="empty-orders">
           <i class="fas fa-receipt" style="font-size: 4rem; color: #e63946; margin-bottom: 20px;"></i>
@@ -455,7 +463,7 @@ async function loadUserOrders() {
       let statusClass = '';
       let statusIcon = '';
       
-      switch(order.status.toLowerCase()) {
+      switch((order.status || "Pending").toLowerCase()) {
         case 'pending':
           statusClass = 'status-pending';
           statusIcon = '⏳';
@@ -481,10 +489,10 @@ async function loadUserOrders() {
         <div class="order-card" data-timestamp="${order.timestamp}">
           <div class="order-header">
             <span class="order-date">📅 ${new Date(order.timestamp).toLocaleString()}</span>
-            <span class="order-status ${statusClass}">${statusIcon} ${order.status}</span>
+            <span class="order-status ${statusClass}">${statusIcon} ${order.status || "Pending"}</span>
           </div>
           <div class="order-items">
-            ${order.orderList.split(', ').map(item => {
+            ${(order.orderList || "").split(', ').map(item => {
               const parts = item.split(' (₱');
               return `<div class="order-item">
                 <span class="order-item-name">${parts[0]}</span>
@@ -493,7 +501,7 @@ async function loadUserOrders() {
           </div>
           <div class="order-total">
             <span>Total:</span>
-            <span>₱${parseFloat(order.totalPrice).toLocaleString()}</span>
+            <span>₱${parseFloat(order.totalPrice || 0).toLocaleString()}</span>
           </div>
         </div>
       `;
@@ -504,7 +512,8 @@ async function loadUserOrders() {
     ordersContainer.innerHTML = `
       <div class="empty-orders">
         <i class="fas fa-exclamation-circle" style="font-size: 4rem; color: #e63946; margin-bottom: 20px;"></i>
-        <p>Failed to load orders. Please try again.</p>
+        <p>Failed to load orders. Error: ${error.message}</p>
+        <button class="btn-primary-apple" onclick="loadUserOrders()" style="margin-top: 20px;">Try Again</button>
       </div>
     `;
   }
@@ -948,6 +957,7 @@ function init() {
   window.logout = logout;
   window.testLoginWithPhone = testLoginWithPhone;
   window.viewOrderHistory = viewOrderHistory;
+  window.loadUserOrders = loadUserOrders;
 }
 
 document.addEventListener('DOMContentLoaded', init);
