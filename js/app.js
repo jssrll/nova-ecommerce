@@ -116,29 +116,13 @@ async function handleLogin(event) {
     console.log("Available users:", users);
     console.log("Trying to login with phone:", phone, "password:", password);
     
-    // Try to find user with flexible phone number matching
     const user = users.find(u => {
       const sheetPhone = u.phone.toString();
       const inputPhone = phone.toString();
       
-      console.log("Comparing:", sheetPhone, "vs", inputPhone);
-      
-      // Exact match
       if (sheetPhone === inputPhone) return true;
-      
-      // If input starts with 09 and sheet doesn't have 0 prefix
       if (inputPhone.startsWith('09') && sheetPhone === inputPhone.substring(1)) return true;
-      
-      // If sheet starts with 09 and input doesn't have 0 prefix
       if (sheetPhone.startsWith('09') && inputPhone === sheetPhone.substring(1)) return true;
-      
-      // If input has +63 prefix
-      if (inputPhone.startsWith('+63') && sheetPhone === inputPhone.substring(3)) return true;
-      if (inputPhone.startsWith('+63') && sheetPhone === '0' + inputPhone.substring(3)) return true;
-      
-      // If sheet has +63 prefix
-      if (sheetPhone.startsWith('+63') && inputPhone === sheetPhone.substring(3)) return true;
-      if (sheetPhone.startsWith('+63') && inputPhone === '0' + sheetPhone.substring(3)) return true;
       
       return false;
     });
@@ -340,12 +324,9 @@ async function placeOrder() {
     return false;
   }
   
-  // Create order list string
   const orderList = cart.map(item => `${item.name} x${item.quantity} (₱${item.price * item.quantity})`).join(", ");
   
   try {
-    // First, deduct balance
-    console.log("Deducting balance...");
     const balanceData = new URLSearchParams();
     balanceData.append("action", "updateBalance");
     balanceData.append("phone", currentUser.phone);
@@ -365,8 +346,6 @@ async function placeOrder() {
       return false;
     }
     
-    // Save order to Google Sheets
-    console.log("Saving order...");
     const orderData = new URLSearchParams();
     orderData.append("action", "addOrder");
     orderData.append("timestamp", new Date().toISOString());
@@ -386,11 +365,9 @@ async function placeOrder() {
     console.log("Order save result:", orderResult);
     
     if (orderResult.success) {
-      // Update local user balance
       currentUser.balance = balanceResult.newBalance;
       localStorage.setItem("nova_user", JSON.stringify(currentUser));
       
-      // Clear cart
       cart = [];
       updateCartBadge();
       saveCartToLocal();
@@ -399,8 +376,6 @@ async function placeOrder() {
       showToast(`✅ Order placed successfully! Total: ₱${total}. Remaining balance: ₱${currentUser.balance}`, 3000);
       return true;
     } else {
-      // Refund if order save fails
-      console.log("Order save failed, refunding...");
       const refundData = new URLSearchParams();
       refundData.append("action", "updateBalance");
       refundData.append("phone", currentUser.phone);
@@ -416,6 +391,30 @@ async function placeOrder() {
     showToast("Order failed. Please try again.", 1500);
     return false;
   }
+}
+
+// ========================================
+// ORDER HISTORY FUNCTIONS
+// ========================================
+
+// Function to view order history from profile
+function viewOrderHistory() {
+  if (!currentUser) {
+    showToast("Please login first", 1500);
+    openAccountModal();
+    return;
+  }
+  
+  // Close profile modal
+  closeProfileModal();
+  
+  // Switch to orders page
+  switchPage('orders');
+  
+  // Load orders
+  loadUserOrders();
+  
+  showToast("Loading your order history...", 1500);
 }
 
 async function loadUserOrders() {
@@ -452,26 +451,53 @@ async function loadUserOrders() {
       return;
     }
     
-    ordersContainer.innerHTML = orders.map(order => `
-      <div class="order-card">
-        <div class="order-header">
-          <span class="order-date">📅 ${new Date(order.timestamp).toLocaleString()}</span>
-          <span class="order-status status-${order.status.toLowerCase()}">${order.status}</span>
+    ordersContainer.innerHTML = orders.map(order => {
+      let statusClass = '';
+      let statusIcon = '';
+      
+      switch(order.status.toLowerCase()) {
+        case 'pending':
+          statusClass = 'status-pending';
+          statusIcon = '⏳';
+          break;
+        case 'approved':
+          statusClass = 'status-approved';
+          statusIcon = '✅';
+          break;
+        case 'completed':
+          statusClass = 'status-completed';
+          statusIcon = '🎉';
+          break;
+        case 'cancelled':
+          statusClass = 'status-cancelled';
+          statusIcon = '❌';
+          break;
+        default:
+          statusClass = 'status-pending';
+          statusIcon = '⏳';
+      }
+      
+      return `
+        <div class="order-card" data-timestamp="${order.timestamp}">
+          <div class="order-header">
+            <span class="order-date">📅 ${new Date(order.timestamp).toLocaleString()}</span>
+            <span class="order-status ${statusClass}">${statusIcon} ${order.status}</span>
+          </div>
+          <div class="order-items">
+            ${order.orderList.split(', ').map(item => {
+              const parts = item.split(' (₱');
+              return `<div class="order-item">
+                <span class="order-item-name">${parts[0]}</span>
+              </div>`;
+            }).join('')}
+          </div>
+          <div class="order-total">
+            <span>Total:</span>
+            <span>₱${parseFloat(order.totalPrice).toLocaleString()}</span>
+          </div>
         </div>
-        <div class="order-items">
-          ${order.orderList.split(', ').map(item => {
-            const parts = item.split(' (₱');
-            return `<div class="order-item">
-              <span class="order-item-name">${parts[0]}</span>
-            </div>`;
-          }).join('')}
-        </div>
-        <div class="order-total">
-          <span>Total:</span>
-          <span>₱${parseFloat(order.totalPrice).toLocaleString()}</span>
-        </div>
-      </div>
-    `).reverse().join('');
+      `;
+    }).reverse().join('');
     
   } catch (error) {
     console.error("Load orders error:", error);
@@ -820,125 +846,6 @@ function initCartDrawer() {
 }
 
 // ========================================
-// ORDER HISTORY FUNCTIONS
-// ========================================
-
-// Function to view order history from profile
-function viewOrderHistory() {
-  if (!currentUser) {
-    showToast("Please login first", 1500);
-    openAccountModal();
-    return;
-  }
-  
-  // Close profile modal
-  closeProfileModal();
-  
-  // Switch to orders page
-  switchPage('orders');
-  
-  // Load orders
-  loadUserOrders();
-  
-  showToast("Loading your order history...", 1500);
-}
-
-// Enhanced loadUserOrders function to show status badges
-async function loadUserOrders() {
-  if (!currentUser) {
-    return;
-  }
-  
-  const ordersContainer = document.getElementById("ordersContainer");
-  if (!ordersContainer) return;
-  
-  ordersContainer.innerHTML = '<div style="text-align: center; padding: 40px;"><i class="fas fa-spinner fa-spin"></i> Loading orders...</div>';
-  
-  try {
-    const formData = new URLSearchParams();
-    formData.append("action", "getUserOrders");
-    formData.append("phone", currentUser.phone);
-    
-    const response = await fetch(GOOGLE_SHEETS_URL, {
-      method: "POST",
-      body: formData
-    });
-    
-    const orders = await response.json();
-    console.log("Orders loaded:", orders);
-    
-    if (orders.length === 0) {
-      ordersContainer.innerHTML = `
-        <div class="empty-orders">
-          <i class="fas fa-receipt" style="font-size: 4rem; color: #e63946; margin-bottom: 20px;"></i>
-          <p>No orders yet. Start shopping!</p>
-          <button class="btn-primary-apple" onclick="switchPage('shop')" style="margin-top: 20px;">Shop Now</button>
-        </div>
-      `;
-      return;
-    }
-    
-    ordersContainer.innerHTML = orders.map(order => {
-      // Determine status class and icon
-      let statusClass = '';
-      let statusIcon = '';
-      
-      switch(order.status.toLowerCase()) {
-        case 'pending':
-          statusClass = 'status-pending';
-          statusIcon = '⏳';
-          break;
-        case 'approved':
-          statusClass = 'status-approved';
-          statusIcon = '✅';
-          break;
-        case 'completed':
-          statusClass = 'status-completed';
-          statusIcon = '🎉';
-          break;
-        case 'cancelled':
-          statusClass = 'status-cancelled';
-          statusIcon = '❌';
-          break;
-        default:
-          statusClass = 'status-pending';
-          statusIcon = '⏳';
-      }
-      
-      return `
-        <div class="order-card" data-timestamp="${order.timestamp}">
-          <div class="order-header">
-            <span class="order-date">📅 ${new Date(order.timestamp).toLocaleString()}</span>
-            <span class="order-status ${statusClass}">${statusIcon} ${order.status}</span>
-          </div>
-          <div class="order-items">
-            ${order.orderList.split(', ').map(item => {
-              const parts = item.split(' (₱');
-              return `<div class="order-item">
-                <span class="order-item-name">${parts[0]}</span>
-              </div>`;
-            }).join('')}
-          </div>
-          <div class="order-total">
-            <span>Total:</span>
-            <span>₱${parseFloat(order.totalPrice).toLocaleString()}</span>
-          </div>
-        </div>
-      `;
-    }).reverse().join('');
-    
-  } catch (error) {
-    console.error("Load orders error:", error);
-    ordersContainer.innerHTML = `
-      <div class="empty-orders">
-        <i class="fas fa-exclamation-circle" style="font-size: 4rem; color: #e63946; margin-bottom: 20px;"></i>
-        <p>Failed to load orders. Please try again.</p>
-      </div>
-    `;
-  }
-}
-
-// ========================================
 // ACCOUNT ICON
 // ========================================
 function initAccountIcon() {
@@ -1040,6 +947,7 @@ function init() {
   window.handleRegister = handleRegister;
   window.logout = logout;
   window.testLoginWithPhone = testLoginWithPhone;
+  window.viewOrderHistory = viewOrderHistory;
 }
 
 document.addEventListener('DOMContentLoaded', init);
