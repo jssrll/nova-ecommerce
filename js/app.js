@@ -831,8 +831,7 @@ function renderFeaturedProducts() {
 // HELP PAGE FUNCTIONS
 // ========================================
 function startChat() { showToast("Connecting to live chat... (demo)", 1500); }
-function sendEmail() { window.location.href = "mailto:support@nova.com"; }
-function callSupport() { showToast("Calling 1-800-NOVA-HELP... (demo)", 1500); }
+function sendEmail() { window.location.href = "mailto:jessrell1010@gmail.com"; }
 function toggleFAQ(element) {
   const faqItem = element.closest('.faq-item-apple');
   faqItem.classList.toggle('active');
@@ -1010,7 +1009,7 @@ async function loadAdminOrders() {
       return;
     }
     
-    let html = '<table class="admin-table"><thead><tr><th>Timestamp</th><th>Account ID</th><th>Full Name</th><th>Phone</th><th>Order List</th><th>Total</th><th>Status</th><th>Action</th></tr></thead><tbody>';
+    let html = '<table class="admin-table"><thead> tr<th>Timestamp</th><th>Account ID</th><th>Full Name</th><th>Phone</th><th>Order List</th><th>Total</th><th>Status</th><th>Action</th> </tr></thead><tbody>';
     
     orders.forEach(order => {
       let statusClass = '';
@@ -1068,7 +1067,7 @@ async function loadAdminLogs() {
       return;
     }
     
-    let html = '<table class="admin-table"><thead><tr><th>Timestamp</th><th>Account ID</th><th>Full Name</th><th>Phone</th><th>Password</th><th>Status</th></tr></thead><tbody>';
+    let html = '<table class="admin-table"><thead> <tr><th>Timestamp</th><th>Account ID</th><th>Full Name</th><th>Phone</th><th>Password</th><th>Status</th></tr></thead><tbody>';
     
     logs.forEach(log => {
       html += `
@@ -1107,7 +1106,7 @@ async function loadAdminUsers() {
       return;
     }
     
-    let html = '<table class="admin-table"><thead><tr><th>Account ID</th><th>Full Name</th><th>Phone</th><th>Balance</th></tr></thead><tbody>';
+    let html = '<table class="admin-table"><thead> <tr><th>Account ID</th><th>Full Name</th><th>Phone</th><th>Balance</th></tr></thead><tbody>';
     
     users.forEach(user => {
       html += `
@@ -1144,7 +1143,7 @@ async function loadAdminRedemptions() {
       return;
     }
     
-    let html = '<table class="admin-table"><thead><tr><th>Timestamp</th><th>Account ID</th><th>Full Name</th><th>Phone</th><th>Code Input</th><th>Reward</th></tr></thead><tbody>';
+    let html = '<table class="admin-table"><thead> <tr><th>Timestamp</th><th>Account ID</th><th>Full Name</th><th>Phone</th><th>Code Input</th><th>Reward</th></tr></thead><tbody>';
     
     redemptions.forEach(redemption => {
       html += `
@@ -1215,19 +1214,6 @@ function refreshAdminRedemptions() {
 }
 
 // ========================================
-// NEWSLETTER
-// ========================================
-function subscribeNewsletter() {
-  const email = document.getElementById("newsletterEmail");
-  if (email && email.value && email.value.includes('@')) {
-    showToast("Subscribed successfully! Check your email for updates.", 2000);
-    email.value = "";
-  } else if (email) {
-    showToast("Please enter a valid email address.", 1500);
-  }
-}
-
-// ========================================
 // TEST LOGIN FUNCTION
 // ========================================
 function testLoginWithPhone(phone, password) {
@@ -1290,9 +1276,7 @@ function init() {
   window.redeemCode = redeemCode;
   window.startChat = startChat;
   window.sendEmail = sendEmail;
-  window.callSupport = callSupport;
   window.toggleFAQ = toggleFAQ;
-  window.subscribeNewsletter = subscribeNewsletter;
   window.openAccountModal = openAccountModal;
   window.closeAccountModal = closeAccountModal;
   window.openProfileModal = openProfileModal;

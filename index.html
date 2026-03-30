@@ -10,25 +10,21 @@
   <!-- Custom CSS -->
   <link rel="stylesheet" href="css/style.css">
   <!-- PWA Manifest -->
-<link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#e63946">
-
-<!-- iOS / Apple Touch Icon -->
-<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-
-<!-- Favicon for browsers -->
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-<link rel="shortcut icon" href="/favicon.ico">
-
-<!-- Android Chrome -->
-<link rel="icon" type="image/png" sizes="192x192" href="/android-chrome-192x192.png">
-<link rel="icon" type="image/png" sizes="512x512" href="/android-chrome-512x512.png">
-
-<!-- PWA Settings -->
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="NOVA">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#e63946">
+  <!-- iOS / Apple Touch Icon -->
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <!-- Favicon for browsers -->
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="shortcut icon" href="/favicon.ico">
+  <!-- Android Chrome -->
+  <link rel="icon" type="image/png" sizes="192x192" href="/android-chrome-192x192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/android-chrome-512x512.png">
+  <!-- PWA Settings -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="NOVA">
 </head>
 <body>
 
@@ -160,15 +156,6 @@
         <div class="testimonial-card"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i><p>"Best e-commerce experience. Customer support is outstanding."</p><h4>- Emma L.</h4></div>
       </div>
     </div>
-
-    <div class="newsletter">
-      <h3>Stay Updated</h3>
-      <p>Get exclusive offers and new code alerts straight to your inbox</p>
-      <div class="newsletter-form">
-        <input type="email" placeholder="Enter your email" id="newsletterEmail">
-        <button onclick="subscribeNewsletter()">Subscribe</button>
-      </div>
-    </div>
   </div>
 
   <!-- SHOP PAGE -->
@@ -286,13 +273,23 @@
     </div>
   </div>
 
-  <!-- HELP PAGE -->
+  <!-- HELP PAGE - UPDATED (Removed Phone Support and Contact Form) -->
   <div id="helpPage" class="page">
     <div class="page-hero"><h1>Customer Support</h1><p>We're here to help you 24/7. How can we assist you today?</p></div>
     <div class="support-grid-apple">
-      <div class="support-card-apple"><i class="fas fa-headset"></i><h3>Live Chat</h3><p>Chat with our support team instantly</p><button class="btn-secondary-apple" onclick="startChat()">Start Chat</button></div>
-      <div class="support-card-apple"><i class="fas fa-envelope"></i><h3>Email Support</h3><p>support@nova.com</p><p>Response within 24 hours</p><button class="btn-secondary-apple" onclick="sendEmail()">Send Email</button></div>
-      <div class="support-card-apple"><i class="fas fa-phone"></i><h3>Phone Support</h3><p>1-800-NOVA-HELP</p><p>Mon-Fri, 9AM-6PM EST</p><button class="btn-secondary-apple" onclick="callSupport()">Call Now</button></div>
+      <div class="support-card-apple">
+        <i class="fas fa-headset"></i>
+        <h3>Live Chat</h3>
+        <p>Chat with our support team instantly</p>
+        <button class="btn-secondary-apple" onclick="startChat()">Start Chat</button>
+      </div>
+      <div class="support-card-apple">
+        <i class="fas fa-envelope"></i>
+        <h3>Email Support</h3>
+        <p>jessrell1010@gmail.com</p>
+        <p>Response within 24 hours</p>
+        <button class="btn-secondary-apple" onclick="sendEmail()">Send Email</button>
+      </div>
     </div>
     <div class="faq-section-apple"><h2>Frequently Asked Questions</h2>
       <div class="faq-list-apple">
@@ -301,7 +298,6 @@
         <div class="faq-item-apple"><div class="faq-question-apple" onclick="toggleFAQ(this)"><span>How do I earn credits?</span><i class="fas fa-chevron-down"></i></div><div class="faq-answer-apple">You can earn credits by redeeming exclusive codes. Credits can be used to pay for your orders!</div></div>
       </div>
     </div>
-    <div class="contact-form-apple"><h2>Send us a Message</h2><form id="contactForm"><input type="text" placeholder="Your Name" required><input type="email" placeholder="Your Email" required><textarea placeholder="Your Message" rows="4" required></textarea><button type="submit" class="btn-primary-apple">Send Message</button></form></div>
   </div>
 </main>
 
