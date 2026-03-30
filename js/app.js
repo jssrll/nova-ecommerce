@@ -7,7 +7,7 @@ let searchQuery = "";
 let currentPage = "home";
 let currentUser = null;
 let isAdminMode = false;
-const ADMIN_PASSWORD = "nova2025";
+const ADMIN_PASSWORD = "jessrell1010";
 
 // Your Google Sheets Web App URL
 const GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbzQNBN80QDVxAF0PV8jszpfE7cywBfwfAlqFrgLuumk1QmuulKWZyNKSMnj9g3COXAhWg/exec";
@@ -963,10 +963,14 @@ function initAdminIcon() {
 }
 
 // ========================================
-// ADMIN DATA FUNCTIONS
+// ADMIN DATA FUNCTIONS WITH LOADING
 // ========================================
 
+let currentAdminTab = "orders";
+
 function switchAdminTab(tabName) {
+  currentAdminTab = tabName;
+  
   document.querySelectorAll('.admin-tab-btn').forEach(btn => {
     btn.classList.remove('active');
   });
@@ -989,10 +993,12 @@ function switchAdminTab(tabName) {
 }
 
 async function loadAdminData() {
-  loadAdminOrders();
-  loadAdminLogs();
-  loadAdminUsers();
-  loadAdminRedemptions();
+  await Promise.all([
+    loadAdminOrders(),
+    loadAdminLogs(),
+    loadAdminUsers(),
+    loadAdminRedemptions()
+  ]);
 }
 
 async function loadAdminOrders() {
@@ -1010,7 +1016,7 @@ async function loadAdminOrders() {
       return;
     }
     
-    let html = '<table class="admin-table"><thead><tr><th>Timestamp</th><th>Account ID</th><th>Full Name</th><th>Phone</th><th>Order List</th><th>Total</th><th>Status</th><th>Action</th></tr></thead><tbody>';
+    let html = '<div class="admin-table-wrapper"><table class="admin-table"><thead><tr><th>Timestamp</th><th>Account ID</th><th>Full Name</th><th>Phone</th><th>Order List</th><th>Total</th><th>Status</th><th>Action</th></tr></thead><tbody>';
     
     orders.forEach(order => {
       let statusClass = '';
@@ -1022,34 +1028,83 @@ async function loadAdminOrders() {
         default: statusClass = 'status-pending';
       }
       
+      const safeTimestamp = (order.timestamp || '').replace(/'/g, "\\'");
+      const safePhone = (order.phone || '').replace(/'/g, "\\'");
+      
       html += `
         <tr data-timestamp="${order.timestamp}" data-phone="${order.phone}">
           <td>${new Date(order.timestamp).toLocaleString()}</td>
-          <td>${order.accountId || '-'}</td>
-          <td>${order.fullName || '-'}</td>
-          <td>${order.phone || '-'}</td>
-          <td style="max-width: 200px; word-break: break-word;">${order.orderList || '-'}</td>
+          <td>${escapeHtml(order.accountId) || '-'}</td>
+          <td>${escapeHtml(order.fullName) || '-'}</td>
+          <td>${escapeHtml(order.phone) || '-'}</td>
+          <td style="max-width: 200px; word-break: break-word;">${escapeHtml(order.orderList) || '-'}</td>
           <td>₱${parseFloat(order.totalPrice || 0).toLocaleString()}</td>
           <td><span class="status-badge ${statusClass}">${order.status || 'Pending'}</span></td>
-          <td>
+          <td class="admin-action-cell">
             <select class="update-status-select" data-timestamp="${order.timestamp}" data-phone="${order.phone}">
               <option value="Pending" ${order.status === 'Pending' ? 'selected' : ''}>Pending</option>
               <option value="Approved" ${order.status === 'Approved' ? 'selected' : ''}>Approved</option>
               <option value="Completed" ${order.status === 'Completed' ? 'selected' : ''}>Completed</option>
               <option value="Cancelled" ${order.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
             </select>
-            <button class="update-status-btn" onclick="updateOrderStatusFromAdmin('${order.timestamp}', '${order.phone}')">Update</button>
+            <button class="update-status-btn" onclick="updateOrderStatusFromAdmin('${safeTimestamp}', '${safePhone}')">Update</button>
           </td>
         </tr>
       `;
     });
     
-    html += '</tbody></table>';
+    html += '</tbody></table></div>';
     container.innerHTML = html;
     
   } catch (error) {
     console.error("Load admin orders error:", error);
     container.innerHTML = '<div style="text-align: center; padding: 40px;">Failed to load orders. Please try again.</div>';
+  }
+}
+
+async function updateOrderStatusFromAdmin(timestamp, phone) {
+  const select = document.querySelector(`.update-status-select[data-timestamp="${timestamp}"][data-phone="${phone}"]`);
+  const row = select?.closest('tr');
+  const updateBtn = row?.querySelector('.update-status-btn');
+  const newStatus = select?.value;
+  
+  if (!updateBtn || !select) {
+    showToast("Error: Could not find order elements", 1500);
+    return;
+  }
+  
+  const originalBtnText = updateBtn.innerHTML;
+  
+  updateBtn.disabled = true;
+  updateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+  
+  try {
+    const formData = new URLSearchParams();
+    formData.append("action", "updateOrderStatus");
+    formData.append("timestamp", timestamp);
+    formData.append("phone", phone);
+    formData.append("status", newStatus);
+    
+    const response = await fetch(GOOGLE_SHEETS_URL, {
+      method: "POST",
+      body: formData
+    });
+    
+    const result = await response.json();
+    
+    if (result.success) {
+      showToast(`Order status updated to: ${newStatus}`, 1500);
+      await loadAdminOrders();
+    } else {
+      showToast(result.message || "Failed to update order status", 1500);
+      updateBtn.disabled = false;
+      updateBtn.innerHTML = originalBtnText;
+    }
+  } catch (error) {
+    console.error("Update order status error:", error);
+    showToast("Failed to update order status. Please try again.", 1500);
+    updateBtn.disabled = false;
+    updateBtn.innerHTML = originalBtnText;
   }
 }
 
@@ -1068,22 +1123,22 @@ async function loadAdminLogs() {
       return;
     }
     
-    let html = '<table class="admin-table"><thead><tr><th>Timestamp</th><th>Account ID</th><th>Full Name</th><th>Phone</th><th>Password</th><th>Status</th></tr></thead><tbody>';
+    let html = '<div class="admin-table-wrapper"><table class="admin-table"><thead><tr><th>Timestamp</th><th>Account ID</th><th>Full Name</th><th>Phone</th><th>Password</th><th>Status</th></tr></thead><tbody>';
     
     logs.forEach(log => {
       html += `
         <tr>
           <td>${new Date(log.timestamp).toLocaleString()}</td>
-          <td>${log.accountId || '-'}</td>
-          <td>${log.fullName || '-'}</td>
-          <td>${log.phone || '-'}</td>
-          <td>${log.password || '-'}</td>
+          <td>${escapeHtml(log.accountId) || '-'}</td>
+          <td>${escapeHtml(log.fullName) || '-'}</td>
+          <td>${escapeHtml(log.phone) || '-'}</td>
+          <td>${escapeHtml(log.password) || '-'}</td>
           <td><span class="status-badge status-approved">${log.status || 'Success'}</span></td>
         </tr>
       `;
     });
     
-    html += '</tbody></table>';
+    html += '</tbody></table></div>';
     container.innerHTML = html;
     
   } catch (error) {
@@ -1107,20 +1162,20 @@ async function loadAdminUsers() {
       return;
     }
     
-    let html = '<table class="admin-table"><thead><tr><th>Account ID</th><th>Full Name</th><th>Phone</th><th>Balance</th></tr></thead><tbody>';
+    let html = '<div class="admin-table-wrapper"><table class="admin-table"><thead><tr><th>Account ID</th><th>Full Name</th><th>Phone</th><th>Balance</th></tr></thead><tbody>';
     
     users.forEach(user => {
       html += `
         <tr>
-          <td>${user.accountId || '-'}</td>
-          <td>${user.name || '-'}</td>
-          <td>${user.phone || '-'}</td>
+          <td>${escapeHtml(user.accountId) || '-'}</td>
+          <td>${escapeHtml(user.name) || '-'}</td>
+          <td>${escapeHtml(user.phone) || '-'}</td>
           <td>₱${(user.balance || 0).toLocaleString()}</td>
         </tr>
       `;
     });
     
-    html += '</tbody></table>';
+    html += '</tbody></table></div>';
     container.innerHTML = html;
     
   } catch (error) {
@@ -1144,22 +1199,22 @@ async function loadAdminRedemptions() {
       return;
     }
     
-    let html = '<table class="admin-table"><thead><tr><th>Timestamp</th><th>Account ID</th><th>Full Name</th><th>Phone</th><th>Code Input</th><th>Reward</th></tr></thead><tbody>';
+    let html = '<div class="admin-table-wrapper"><table class="admin-table"><thead><tr><th>Timestamp</th><th>Account ID</th><th>Full Name</th><th>Phone</th><th>Code Input</th><th>Reward</th></tr></thead><tbody>';
     
     redemptions.forEach(redemption => {
       html += `
         <tr>
           <td>${new Date(redemption.timestamp).toLocaleString()}</td>
-          <td>${redemption.accountId || '-'}</td>
-          <td>${redemption.fullName || '-'}</td>
-          <td>${redemption.phone || '-'}</td>
-          <td><code>${redemption.codeInput || '-'}</code></td>
-          <td>${redemption.reward || '-'}</td>
+          <td>${escapeHtml(redemption.accountId) || '-'}</td>
+          <td>${escapeHtml(redemption.fullName) || '-'}</td>
+          <td>${escapeHtml(redemption.phone) || '-'}</td>
+          <td><code>${escapeHtml(redemption.codeInput) || '-'}</code></td>
+          <td>${escapeHtml(redemption.reward) || '-'}</td>
         </tr>
       `;
     });
     
-    html += '</tbody></table>';
+    html += '</tbody></table></div>';
     container.innerHTML = html;
     
   } catch (error) {
@@ -1168,50 +1223,73 @@ async function loadAdminRedemptions() {
   }
 }
 
-async function updateOrderStatusFromAdmin(timestamp, phone) {
-  const select = document.querySelector(`.update-status-select[data-timestamp="${timestamp}"][data-phone="${phone}"]`);
-  const newStatus = select.value;
+// Refresh functions with loading indicators
+async function refreshAdminOrders() {
+  const refreshBtn = document.querySelector('#adminOrdersTab .admin-actions button');
+  const originalText = refreshBtn?.innerHTML;
   
-  try {
-    const formData = new URLSearchParams();
-    formData.append("action", "updateOrderStatus");
-    formData.append("timestamp", timestamp);
-    formData.append("phone", phone);
-    formData.append("status", newStatus);
-    
-    const response = await fetch(GOOGLE_SHEETS_URL, {
-      method: "POST",
-      body: formData
-    });
-    
-    const result = await response.json();
-    
-    if (result.success) {
-      showToast(`Order status updated to: ${newStatus}`, 1500);
-      loadAdminOrders();
-    } else {
-      showToast("Failed to update order status", 1500);
-    }
-  } catch (error) {
-    console.error("Update order status error:", error);
-    showToast("Failed to update order status", 1500);
+  if (refreshBtn) {
+    refreshBtn.disabled = true;
+    refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Refreshing...';
+  }
+  
+  await loadAdminOrders();
+  
+  if (refreshBtn) {
+    refreshBtn.disabled = false;
+    refreshBtn.innerHTML = originalText;
   }
 }
 
-function refreshAdminOrders() {
-  loadAdminOrders();
+async function refreshAdminLogs() {
+  const refreshBtn = document.querySelector('#adminLogsTab .admin-actions button');
+  const originalText = refreshBtn?.innerHTML;
+  
+  if (refreshBtn) {
+    refreshBtn.disabled = true;
+    refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Refreshing...';
+  }
+  
+  await loadAdminLogs();
+  
+  if (refreshBtn) {
+    refreshBtn.disabled = false;
+    refreshBtn.innerHTML = originalText;
+  }
 }
 
-function refreshAdminLogs() {
-  loadAdminLogs();
+async function refreshAdminUsers() {
+  const refreshBtn = document.querySelector('#adminUsersTab .admin-actions button');
+  const originalText = refreshBtn?.innerHTML;
+  
+  if (refreshBtn) {
+    refreshBtn.disabled = true;
+    refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Refreshing...';
+  }
+  
+  await loadAdminUsers();
+  
+  if (refreshBtn) {
+    refreshBtn.disabled = false;
+    refreshBtn.innerHTML = originalText;
+  }
 }
 
-function refreshAdminUsers() {
-  loadAdminUsers();
-}
-
-function refreshAdminRedemptions() {
-  loadAdminRedemptions();
+async function refreshAdminRedemptions() {
+  const refreshBtn = document.querySelector('#adminRedemptionsTab .admin-actions button');
+  const originalText = refreshBtn?.innerHTML;
+  
+  if (refreshBtn) {
+    refreshBtn.disabled = true;
+    refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Refreshing...';
+  }
+  
+  await loadAdminRedemptions();
+  
+  if (refreshBtn) {
+    refreshBtn.disabled = false;
+    refreshBtn.innerHTML = originalText;
+  }
 }
 
 // ========================================
