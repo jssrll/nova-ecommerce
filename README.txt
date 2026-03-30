@@ -54,7 +54,7 @@ Technologies Used:
 
 Push to GitHub
 cd C:\Users\ASUS\OneDrive\Ecommerce\nova-ecommerce
-git add js/app.js
+git add css/style.css
 git commit -m "Fixed login with phone number format handling"
 git push
 
