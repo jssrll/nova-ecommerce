@@ -2195,3 +2195,71 @@ button:disabled {
     font-size: 0.65rem;
   }
 }
+
+/* ========================================
+   ADMIN MODE STYLES
+   ======================================== */
+.admin-exit-btn {
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: #e63946;
+  background: transparent;
+  border: 1px solid #e63946;
+  padding: 6px 12px;
+  border-radius: 980px;
+  transition: 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-exit-btn:hover {
+  background: #e63946;
+  color: white;
+}
+
+.admin-mode-badge {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #e63946;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 980px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  z-index: 1000;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-mode-badge i {
+  font-size: 0.9rem;
+}
+
+/* Hide regular navigation in admin mode */
+body.admin-mode .nav-links {
+  display: none !important;
+}
+
+body.admin-mode .cart-icon {
+  display: none !important;
+}
+
+body.admin-mode .account-icon {
+  display: none !important;
+}
+
+body.admin-mode .admin-icon {
+  display: none !important;
+}
+
+body.admin-mode .admin-exit-btn {
+  display: flex !important;
+}
+
+body.admin-mode .admin-mode-badge {
+  display: flex !important;
+}

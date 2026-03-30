@@ -6,6 +6,8 @@ let currentCategory = "all";
 let searchQuery = "";
 let currentPage = "home";
 let currentUser = null;
+let isAdminMode = false;
+const ADMIN_PASSWORD = "nova2025";
 
 // Your Google Sheets Web App URL
 const GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbzQNBN80QDVxAF0PV8jszpfE7cywBfwfAlqFrgLuumk1QmuulKWZyNKSMnj9g3COXAhWg/exec";
@@ -541,10 +543,14 @@ function switchPage(pageName) {
   document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
   const targetPage = document.getElementById(`${pageName}Page`);
   if (targetPage) targetPage.classList.add('active');
-  document.querySelectorAll('.nav-link').forEach(link => {
-    link.classList.remove('active');
-    if (link.getAttribute('data-page') === pageName) link.classList.add('active');
-  });
+  
+  if (!isAdminMode) {
+    document.querySelectorAll('.nav-link').forEach(link => {
+      link.classList.remove('active');
+      if (link.getAttribute('data-page') === pageName) link.classList.add('active');
+    });
+  }
+  
   currentPage = pageName;
   if (pageName === 'featured') loadFeaturedPage();
   else if (pageName === 'shop') renderProducts();
@@ -908,27 +914,59 @@ function initAccountIcon() {
 }
 
 // ========================================
-// ADMIN FUNCTIONS
+// ADMIN MODE FUNCTIONS
 // ========================================
 
-const ADMIN_PASSWORD = "nova2025";
-
-function openAdminPage() {
-  const password = prompt("Enter admin password:");
-  
-  if (password === ADMIN_PASSWORD) {
-    switchPage('admin');
-    loadAdminData();
-  } else if (password !== null) {
-    showToast("Invalid admin password", 1500);
+function toggleAdminMode() {
+  if (isAdminMode) {
+    exitAdminMode();
+  } else {
+    const password = prompt("Enter admin password:");
+    if (password === ADMIN_PASSWORD) {
+      enterAdminMode();
+    } else if (password !== null) {
+      showToast("Invalid admin password", 1500);
+    }
   }
 }
 
-let currentAdminTab = "orders";
+function enterAdminMode() {
+  isAdminMode = true;
+  document.body.classList.add('admin-mode');
+  
+  loadAdminData();
+  switchPage('admin');
+  showToast("Admin mode activated", 1500);
+}
+
+function exitAdminMode() {
+  isAdminMode = false;
+  document.body.classList.remove('admin-mode');
+  switchPage('home');
+  showToast("Exited admin mode", 1500);
+}
+
+function initAdminIcon() {
+  const adminIcon = document.getElementById('adminIcon');
+  if (adminIcon) {
+    adminIcon.addEventListener('click', () => {
+      toggleAdminMode();
+    });
+  }
+  
+  const adminExitBtn = document.getElementById('adminExitBtn');
+  if (adminExitBtn) {
+    adminExitBtn.addEventListener('click', () => {
+      exitAdminMode();
+    });
+  }
+}
+
+// ========================================
+// ADMIN DATA FUNCTIONS
+// ========================================
 
 function switchAdminTab(tabName) {
-  currentAdminTab = tabName;
-  
   document.querySelectorAll('.admin-tab-btn').forEach(btn => {
     btn.classList.remove('active');
   });
@@ -1239,12 +1277,7 @@ function init() {
     });
   });
   
-  const adminIcon = document.getElementById('adminIcon');
-  if (adminIcon) {
-    adminIcon.addEventListener('click', () => {
-      openAdminPage();
-    });
-  }
+  initAdminIcon();
   
   switchPage('home');
   initFilters();
@@ -1271,7 +1304,9 @@ function init() {
   window.testLoginWithPhone = testLoginWithPhone;
   window.viewOrderHistory = viewOrderHistory;
   window.loadUserOrders = loadUserOrders;
-  window.openAdminPage = openAdminPage;
+  window.toggleAdminMode = toggleAdminMode;
+  window.enterAdminMode = enterAdminMode;
+  window.exitAdminMode = exitAdminMode;
   window.switchAdminTab = switchAdminTab;
   window.updateOrderStatusFromAdmin = updateOrderStatusFromAdmin;
   window.refreshAdminOrders = refreshAdminOrders;
