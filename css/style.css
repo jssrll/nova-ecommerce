@@ -2601,3 +2601,93 @@ body.admin-mode .recharge-icon {
   background: #e63946;
   color: white;
 }
+
+/* ========================================
+   PWA INSTALL TOAST STYLES
+   ======================================== */
+.install-toast {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  right: 20px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+  z-index: 1000;
+  transform: translateY(100px);
+  opacity: 0;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.install-toast.show {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.install-toast-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.install-toast-content i {
+  font-size: 1.2rem;
+  color: #e63946;
+}
+
+.install-toast-content span {
+  flex: 1;
+  font-size: 0.85rem;
+  color: #1d1d1f;
+}
+
+.install-btn {
+  background: #e63946;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 980px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.8rem;
+  transition: 0.2s;
+}
+
+.install-btn:hover {
+  background: #ff6a3d;
+  transform: scale(1.02);
+}
+
+.close-toast {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: #86868b;
+  padding: 4px 8px;
+}
+
+.close-toast:hover {
+  color: #e63946;
+}
+
+@media (max-width: 768px) {
+  .install-toast {
+    left: 16px;
+    right: 16px;
+    bottom: 16px;
+  }
+  
+  .install-toast-content {
+    flex-wrap: wrap;
+    justify-content: center;
+    text-align: center;
+  }
+  
+  .install-btn {
+    width: 100%;
+  }
+}

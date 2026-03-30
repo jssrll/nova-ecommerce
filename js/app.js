@@ -1254,6 +1254,65 @@ function testLoginWithPhone(phone, password) {
 }
 
 // ========================================
+// PWA INSTALL PROMPT
+// ========================================
+
+let deferredPrompt;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  // Prevent Chrome 67 and earlier from automatically showing the prompt
+  e.preventDefault();
+  // Stash the event so it can be triggered later
+  deferredPrompt = e;
+  
+  // Show install button (you can add this to your UI)
+  showInstallPromotion();
+});
+
+function showInstallPromotion() {
+  // Create a toast or notification asking to install
+  setTimeout(() => {
+    const installToast = document.createElement('div');
+    installToast.className = 'install-toast';
+    installToast.innerHTML = `
+      <div class="install-toast-content">
+        <i class="fas fa-download"></i>
+        <span>Install NOVA as an app for better experience!</span>
+        <button class="install-btn" onclick="promptInstall()">Install</button>
+        <button class="close-toast" onclick="closeInstallToast()">×</button>
+      </div>
+    `;
+    document.body.appendChild(installToast);
+    setTimeout(() => {
+      installToast.classList.add('show');
+    }, 100);
+  }, 2000);
+}
+
+function promptInstall() {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then((choiceResult) => {
+      if (choiceResult.outcome === 'accepted') {
+        console.log('User accepted the install prompt');
+      } else {
+        console.log('User dismissed the install prompt');
+      }
+      deferredPrompt = null;
+    });
+  }
+  closeInstallToast();
+}
+
+function closeInstallToast() {
+  const toast = document.querySelector('.install-toast');
+  if (toast) {
+    toast.classList.remove('show');
+    setTimeout(() => toast.remove(), 300);
+  }
+}
+
+// ========================================
 // INITIALIZATION
 // ========================================
 function init() {
