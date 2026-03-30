@@ -7,7 +7,7 @@ let searchQuery = "";
 let currentPage = "home";
 let currentUser = null;
 let isAdminMode = false;
-const ADMIN_PASSWORD = "nova2025";
+const ADMIN_PASSWORD = "maryann";
 
 // Your Google Sheets Web App URL
 const GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbzQNBN80QDVxAF0PV8jszpfE7cywBfwfAlqFrgLuumk1QmuulKWZyNKSMnj9g3COXAhWg/exec";
