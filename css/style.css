@@ -2571,3 +2571,33 @@ body.admin-mode .recharge-icon {
 .copy-number-btn:hover {
   background: #e63946;
 }
+
+/* GCash QR Code Image */
+#gcashQRImage {
+  border: 1px solid #e9e9ef;
+  border-radius: 16px;
+  padding: 10px;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.qr-code-container {
+  text-align: center;
+  margin: 20px 0;
+}
+
+.copy-btn-small {
+  background: #f0f0f0;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  cursor: pointer;
+  margin-left: 8px;
+  transition: 0.2s;
+}
+
+.copy-btn-small:hover {
+  background: #e63946;
+  color: white;
+}

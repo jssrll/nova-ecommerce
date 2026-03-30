@@ -866,7 +866,7 @@ function initAccountIcon() {
 }
 
 // ========================================
-// RECHARGE FUNCTIONS WITH GCASH QR + MANUAL OPTION
+// RECHARGE FUNCTIONS WITH STATIC GCASH QR CODE
 // ========================================
 let activePaymentInterval = null;
 let paymentTimeout = null;
@@ -907,73 +907,15 @@ function initiateGCashPayment(amount) {
   document.getElementById('gcashQRModal').style.display = 'flex';
   document.getElementById('qrPaymentAmount').innerHTML = `₱${amount.toLocaleString()}`;
   document.getElementById('instructionAmount').innerHTML = `₱${amount.toLocaleString()}`;
-  document.getElementById('instructionRef').innerHTML = orderId;
+  document.getElementById('manualAmount').innerHTML = `₱${amount.toLocaleString()}`;
   
-  generateQRCode(amount, orderId);
-  startPaymentTimer();
-}
-
-function generateQRCode(amount, orderId) {
-  const qrLoading = document.getElementById('qrLoading');
-  const qrImage = document.getElementById('qrCodeImage');
-  const gcashNumber = document.getElementById('gcashNumber').innerText;
-  const gcashName = document.getElementById('gcashName').innerText;
-  
-  qrLoading.style.display = 'block';
-  qrImage.style.display = 'none';
-  
-  // QR Ph Standard Format for GCash
-  const qrPhString = `PH/GCASH/${gcashNumber}?amount=${amount}`;
-  
-  // Use reliable QR code generator
-  const qrCodeUrl = `https://quickchart.io/qr?text=${encodeURIComponent(qrPhString)}&size=250&margin=2&ecLevel=H`;
-  
-  qrImage.onload = () => {
-    qrLoading.style.display = 'none';
+  // Show the static GCash QR code
+  const qrImage = document.getElementById('gcashQRImage');
+  if (qrImage) {
     qrImage.style.display = 'block';
-  };
+  }
   
-  qrImage.onerror = () => {
-    qrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(qrPhString)}`;
-  };
-  
-  qrImage.src = qrCodeUrl;
-  
-  // Add manual payment section if not exists
-  addManualPaymentSection(amount, orderId);
-}
-
-function addManualPaymentSection(amount, orderId) {
-  const existingManual = document.querySelector('.manual-payment-section');
-  if (existingManual) return;
-  
-  const qrContainer = document.querySelector('.qr-code-container');
-  const manualSection = document.createElement('div');
-  manualSection.className = 'manual-payment-section';
-  manualSection.innerHTML = `
-    <div class="manual-payment-card">
-      <h4>📱 Manual GCash Payment</h4>
-      <div class="gcash-manual-details">
-        <p><i class="fas fa-phone"></i> GCash Number: <strong style="font-size: 1.2rem;">09633863860</strong>
-          <button class="copy-btn-small" onclick="copyToClipboard('09633863860')">Copy</button>
-        </p>
-        <p><i class="fas fa-user"></i> Account Name: <strong>Jessrell M. Custodio</strong></p>
-        <p><i class="fas fa-money-bill"></i> Amount: <strong style="color: #e63946;">₱${amount.toLocaleString()}</strong></p>
-        <p><i class="fas fa-qrcode"></i> Reference: <strong>${orderId}</strong>
-          <button class="copy-btn-small" onclick="copyToClipboard('${orderId}')">Copy</button>
-        </p>
-      </div>
-      <button class="btn-primary-apple" onclick="markAsPaidManually()" style="width: 100%; margin-top: 15px;">
-        <i class="fas fa-check-circle"></i> I Have Paid
-      </button>
-      <div class="payment-note">
-        <i class="fas fa-info-circle"></i>
-        <p>After clicking "I Have Paid", please wait for admin confirmation. You will receive credits within 5-10 minutes.</p>
-      </div>
-    </div>
-  `;
-  
-  qrContainer.insertAdjacentHTML('afterend', manualSection.outerHTML);
+  startPaymentTimer();
 }
 
 async function markAsPaidManually() {
@@ -1024,7 +966,6 @@ async function markAsPaidManually() {
         <div class="status-detail small">Reference: ${currentOrderId}</div>
       `;
       
-      document.querySelector('.qr-code-container').style.display = 'none';
       document.querySelector('.manual-payment-section button').disabled = true;
       
       startPaymentPolling(currentOrderId, amount);
@@ -1096,10 +1037,8 @@ async function checkPaymentStatus(orderId) {
 
 function showPaymentSuccess(amount) {
   const paymentStatus = document.getElementById('paymentStatus');
-  const qrCodeContainer = document.querySelector('.qr-code-container');
   const manualSection = document.querySelector('.manual-payment-section');
   
-  if (qrCodeContainer) qrCodeContainer.style.display = 'none';
   if (manualSection) manualSection.style.display = 'none';
   
   if (paymentStatus) {
@@ -1130,7 +1069,7 @@ function showPaymentTimeout() {
 }
 
 function startPaymentTimer() {
-  let timeLeft = 600;
+  let timeLeft = 600; // 10 minutes
   const timerInterval = setInterval(() => {
     if (!document.getElementById('gcashQRModal') || document.getElementById('gcashQRModal').style.display !== 'flex') {
       clearInterval(timerInterval);
@@ -1152,14 +1091,7 @@ function closeGCashQRModal() {
   paymentTimeout = null;
   
   document.getElementById('gcashQRModal').style.display = 'none';
-  document.getElementById('qrLoading').style.display = 'block';
-  document.getElementById('qrCodeImage').style.display = 'none';
   document.getElementById('paymentStatus').style.display = 'none';
-  
-  // Remove manual section if exists
-  const manualSection = document.querySelector('.manual-payment-section');
-  if (manualSection) manualSection.remove();
-  
   currentOrderId = null;
 }
 
@@ -1296,7 +1228,7 @@ async function loadAdminOrders() {
       return;
     }
     
-    let html = '<table class="admin-table"><thead> <th>Timestamp</th><th>Account ID</th><th>Full Name</th><th>Phone</th><th>Order List</th><th>Total</th><th>Status</th><th>Action</th> </thead><tbody>';
+    let html = '<table class="admin-table"><thead><tr><th>Timestamp</th><th>Account ID</th><th>Full Name</th><th>Phone</th><th>Order List</th><th>Total</th><th>Status</th><th>Action</th></tr></thead><tbody>';
     orders.forEach(order => {
       let statusClass = '';
       switch(order.status?.toLowerCase()) {
@@ -1375,7 +1307,7 @@ async function loadAdminLogs() {
       container.innerHTML = '<div style="text-align: center; padding: 40px;">No login logs found.</div>';
       return;
     }
-    let html = '<table class="admin-table"><thead> <th>Timestamp</th><th>Account ID</th><th>Full Name</th><th>Phone</th><th>Password</th><th>Status</th> </thead><tbody>';
+    let html = '<table class="admin-table"><thead><tr><th>Timestamp</th><th>Account ID</th><th>Full Name</th><th>Phone</th><th>Password</th><th>Status</th></tr></thead><tbody>';
     logs.forEach(log => {
       html += `<tr><td>${new Date(log.timestamp).toLocaleString()}</td><td>${escapeHtml(log.accountId) || '-'}</td><td>${escapeHtml(log.fullName) || '-'}</td><td>${escapeHtml(log.phone) || '-'}</td><td>${escapeHtml(log.password) || '-'}</td><td><span class="status-badge status-approved">${log.status || 'Success'}</span></td></tr>`;
     });
@@ -1397,7 +1329,7 @@ async function loadAdminUsers() {
       container.innerHTML = '<div style="text-align: center; padding: 40px;">No users found.</div>';
       return;
     }
-    let html = '<table class="admin-table"><thead> <th>Account ID</th><th>Full Name</th><th>Phone</th><th>Balance</th> </thead><tbody>';
+    let html = '<table class="admin-table"><thead><tr><th>Account ID</th><th>Full Name</th><th>Phone</th><th>Balance</th></tr></thead><tbody>';
     users.forEach(user => {
       html += `<tr><td>${escapeHtml(user.accountId) || '-'}</td><td>${escapeHtml(user.name) || '-'}</td><td>${escapeHtml(user.phone) || '-'}</td><td>₱${(user.balance || 0).toLocaleString()}</td></tr>`;
     });
@@ -1419,7 +1351,7 @@ async function loadAdminRedemptions() {
       container.innerHTML = '<div style="text-align: center; padding: 40px;">No code redemptions found.</div>';
       return;
     }
-    let html = '<table class="admin-table"><thead> <th>Timestamp</th><th>Account ID</th><th>Full Name</th><th>Phone</th><th>Code Input</th><th>Reward</th> </thead><tbody>';
+    let html = '<table class="admin-table"><thead><tr><th>Timestamp</th><th>Account ID</th><th>Full Name</th><th>Phone</th><th>Code Input</th><th>Reward</th></tr></thead><tbody>';
     redemptions.forEach(red => {
       html += `<tr><td>${new Date(red.timestamp).toLocaleString()}</td><td>${escapeHtml(red.accountId) || '-'}</td><td>${escapeHtml(red.fullName) || '-'}</td><td>${escapeHtml(red.phone) || '-'}</td><td><code>${escapeHtml(red.codeInput) || '-'}</code></td><td>${escapeHtml(red.reward) || '-'}</td></tr>`;
     });
@@ -1441,7 +1373,7 @@ async function loadAdminPayments() {
       container.innerHTML = '<div style="text-align: center; padding: 40px;">No pending payments.</div>';
       return;
     }
-    let html = '<table class="admin-table"><thead> <th>Order ID</th><th>Timestamp</th><th>User</th><th>Phone</th><th>Amount</th><th>Status</th><th>Action</th> </thead><tbody>';
+    let html = '<table class="admin-table"><thead><tr><th>Order ID</th><th>Timestamp</th><th>User</th><th>Phone</th><th>Amount</th><th>Status</th><th>Action</th></tr></thead><tbody>';
     payments.forEach(payment => {
       html += `<tr>
         <td><code>${payment.orderId}</code></td>

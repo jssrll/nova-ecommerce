@@ -471,10 +471,11 @@
       </div>
       
       <div class="qr-code-container">
-        <div class="qr-loading" id="qrLoading">
-          <i class="fas fa-spinner fa-spin"></i> Generating QR Code...
+        <!-- Replace with your actual GCash QR code image URL -->
+        <img id="gcashQRImage" src="https://ik.imagekit.io/0sf7uub8b/Ecommerce/Nova/GCash%20QR%20Code" alt="GCash QR Code" style="width: 250px; height: 250px; margin: 0 auto; display: block;">
+        <div class="qr-loading" id="qrLoading" style="display: none;">
+          <i class="fas fa-spinner fa-spin"></i> Loading QR Code...
         </div>
-        <img id="qrCodeImage" style="display: none;" alt="GCash QR Code">
       </div>
       
       <div class="gcash-details">
@@ -482,28 +483,51 @@
         <p><i class="fas fa-user"></i> Account Name: <strong id="gcashName">Jessrell M. Custodio</strong></p>
       </div>
       
-<div class="payment-instructions">
-  <h4>How to pay via GCash:</h4>
-  <ol>
-    <li><strong>Option 1: Scan QR Code</strong> - Open GCash → Tap "Pay QR" → Scan the code above</li>
-    <li><strong>Option 2: Send Money Manually</strong> - Open GCash → Tap "Send Money" → Enter number: <strong id="instructionNumber">09633863860</strong></li>
-    <li>Enter the exact amount: <strong id="instructionAmount">₱0</strong></li>
-    <li>Add reference: <strong id="instructionRef">NOVA_[YourName]</strong></li>
-    <li>Enter your MPIN to confirm payment</li>
-    <li>After payment, click "I Have Paid" below</li>
-  </ol>
-</div>
-
-<!-- Add this after the QR code section -->
-<div class="manual-payment-section">
-  <button class="btn-primary-apple" onclick="markAsPaidManually()" style="width: 100%; margin-top: 15px;">
-    <i class="fas fa-check-circle"></i> I Have Paid
-  </button>
-  <div class="payment-note">
-    <i class="fas fa-info-circle"></i>
-    <p>After clicking "I Have Paid", please wait for admin confirmation. You will receive credits within 5-10 minutes.</p>
-  </div>
-</div>
+      <div class="payment-instructions">
+        <h4>How to pay:</h4>
+        <ol>
+          <li>Open GCash app on your phone</li>
+          <li>Click <strong>"Pay QR"</strong></li>
+          <li>Scan the QR code above</li>
+          <li>Enter the exact amount: <strong id="instructionAmount">₱0</strong></li>
+          <li>Enter your GCash MPIN to confirm</li>
+          <li>After payment, click "I Have Paid" below</li>
+        </ol>
+      </div>
+      
+      <div class="manual-payment-section">
+        <div class="manual-payment-card">
+          <h4>📱 Manual GCash Payment</h4>
+          <div class="gcash-manual-details">
+            <p><i class="fas fa-phone"></i> GCash Number: <strong style="font-size: 1.2rem;">09633863860</strong>
+              <button class="copy-btn-small" onclick="copyToClipboard('09633863860')">Copy</button>
+            </p>
+            <p><i class="fas fa-user"></i> Account Name: <strong>Jessrell M. Custodio</strong></p>
+            <p><i class="fas fa-money-bill"></i> Amount: <strong style="color: #e63946;" id="manualAmount">₱0</strong></p>
+          </div>
+          <button class="btn-primary-apple" onclick="markAsPaidManually()" style="width: 100%; margin-top: 15px;">
+            <i class="fas fa-check-circle"></i> I Have Paid
+          </button>
+        </div>
+      </div>
+      
+      <div class="payment-status" id="paymentStatus" style="display: none;">
+        <div class="status-icon">
+          <i class="fas fa-spinner fa-spin"></i>
+        </div>
+        <div class="status-text">Waiting for payment confirmation...</div>
+        <div class="status-timer" id="paymentTimer">Time remaining: 10:00</div>
+      </div>
+      
+      <div class="payment-note">
+        <i class="fas fa-info-circle"></i>
+        <p>⚠️ Please do not close this window. After payment, click "I Have Paid" and wait for admin confirmation.</p>
+      </div>
+      
+      <div class="cancel-payment">
+        <button class="btn-secondary-apple" onclick="cancelPayment()">Cancel Payment</button>
+      </div>
+    </div>
   </div>
 </div>
 
