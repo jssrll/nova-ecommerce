@@ -10,7 +10,7 @@ let isAdminMode = false;
 const ADMIN_PASSWORD = "nova2025";
 
 // Your Google Sheets Web App URL
-const GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbxMYY1Vz_avB6CnSa3xLhhHnIRbyns4M4nKzLBUs2FaENsYsGwbHDaKW3Gbea2Ld_DnXw/exec";
+const GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbwYJpo6jZcz9KJGE4yp2D4MsqlaUEruQyEXJcnnYH3U2iliB5NB5YljBIRhr0logvndkQ/exec";
 
 // ========================================
 // HELPER FUNCTIONS
@@ -866,10 +866,8 @@ function initAccountIcon() {
 }
 
 // ========================================
-// RECHARGE FUNCTIONS WITH STATIC GCASH QR CODE
+// RECHARGE FUNCTIONS - SIMPLIFIED
 // ========================================
-let activePaymentInterval = null;
-let paymentTimeout = null;
 let currentOrderId = null;
 
 function loadRechargePage() {
@@ -914,8 +912,6 @@ function initiateGCashPayment(amount) {
   if (qrImage) {
     qrImage.style.display = 'block';
   }
-  
-  startPaymentTimer();
 }
 
 async function markAsPaidManually() {
@@ -964,10 +960,13 @@ async function markAsPaidManually() {
         <div class="status-text">⏳ Payment Pending Confirmation</div>
         <div class="status-detail">Your payment has been recorded. Please wait for admin verification.</div>
         <div class="status-detail small">Reference: ${currentOrderId}</div>
+        <button class="btn-primary-apple" onclick="closeGCashQRModal()" style="margin-top: 15px;">Close</button>
       `;
       
       document.querySelector('.manual-payment-section button').disabled = true;
+      document.querySelector('.cancel-payment').style.display = 'none';
       
+      // Start polling for status change
       startPaymentPolling(currentOrderId, amount);
     } else {
       showToast("Failed to record payment. Please try again.", 1500);
@@ -984,7 +983,7 @@ async function markAsPaidManually() {
 
 function startPaymentPolling(orderId, amount) {
   let attempts = 0;
-  const maxAttempts = 120; // 10 minutes at 5-second intervals
+  const maxAttempts = 120; // 10 minutes
   
   if (activePaymentInterval) clearInterval(activePaymentInterval);
   
@@ -1037,9 +1036,6 @@ async function checkPaymentStatus(orderId) {
 
 function showPaymentSuccess(amount) {
   const paymentStatus = document.getElementById('paymentStatus');
-  const manualSection = document.querySelector('.manual-payment-section');
-  
-  if (manualSection) manualSection.style.display = 'none';
   
   if (paymentStatus) {
     paymentStatus.style.display = 'block';
@@ -1048,6 +1044,7 @@ function showPaymentSuccess(amount) {
       <div class="status-icon"><i class="fas fa-check-circle"></i></div>
       <div class="status-text">✅ Payment Successful!</div>
       <div class="status-detail">₱${amount.toLocaleString()} has been added to your balance.</div>
+      <button class="btn-primary-apple" onclick="closeGCashQRModal()" style="margin-top: 15px;">Close</button>
     `;
   }
   showToast(`✅ Payment successful! ₱${amount.toLocaleString()} added to your balance!`, 4000);
@@ -1066,22 +1063,6 @@ function showPaymentTimeout() {
     `;
   }
   showToast("Payment verification timed out. Please contact support if you paid.", 3000);
-}
-
-function startPaymentTimer() {
-  let timeLeft = 600; // 10 minutes
-  const timerInterval = setInterval(() => {
-    if (!document.getElementById('gcashQRModal') || document.getElementById('gcashQRModal').style.display !== 'flex') {
-      clearInterval(timerInterval);
-      return;
-    }
-    const minutes = Math.floor(timeLeft / 60);
-    const seconds = timeLeft % 60;
-    const timerElement = document.getElementById('paymentTimer');
-    if (timerElement) timerElement.innerHTML = `Time remaining: ${minutes}:${seconds.toString().padStart(2, '0')}`;
-    timeLeft--;
-    if (timeLeft < 0) clearInterval(timerInterval);
-  }, 1000);
 }
 
 function closeGCashQRModal() {
