@@ -198,6 +198,56 @@
     </div>
   </div>
 
+  <!-- RECHARGE PAGE -->
+  <div id="rechargePage" class="page">
+    <div class="page-hero">
+      <h1><i class="fas fa-coins"></i> Credit Recharge</h1>
+      <p>Add credits to your account to use for purchases</p>
+    </div>
+    
+    <div class="recharge-container">
+      <div class="recharge-card">
+        <div class="current-balance">
+          <h3>Current Balance</h3>
+          <div class="balance-amount" id="rechargeBalance">₱0</div>
+        </div>
+        
+        <div class="recharge-options">
+          <h3>Select Amount to Recharge</h3>
+          <div class="recharge-amounts">
+            <button class="recharge-amount-btn" onclick="rechargeAmount(10)">₱10</button>
+            <button class="recharge-amount-btn" onclick="rechargeAmount(20)">₱20</button>
+            <button class="recharge-amount-btn" onclick="rechargeAmount(50)">₱50</button>
+            <button class="recharge-amount-btn" onclick="rechargeAmount(100)">₱100</button>
+            <button class="recharge-amount-btn" onclick="rechargeAmount(200)">₱200</button>
+            <button class="recharge-amount-btn" onclick="rechargeAmount(500)">₱500</button>
+          </div>
+        </div>
+        
+        <div class="custom-amount">
+          <h3>Or Enter Custom Amount</h3>
+          <div class="custom-amount-input">
+            <input type="number" id="customRechargeAmount" placeholder="Enter amount" min="1" step="1">
+            <button class="btn-primary-apple" onclick="rechargeCustomAmount()">Recharge</button>
+          </div>
+        </div>
+        
+        <div class="recharge-note">
+          <i class="fas fa-info-circle"></i>
+          <p>Credits will be added to your balance instantly and can be used for purchases.</p>
+        </div>
+      </div>
+      
+      <!-- Recharge History -->
+      <div class="recharge-history">
+        <h3>Recharge History</h3>
+        <div id="rechargeHistoryContainer" class="recharge-history-list">
+          <div class="empty-history">No recharge history yet.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ADMIN PAGE -->
   <div id="adminPage" class="page">
     <div class="page-hero">
@@ -307,7 +357,7 @@
       <form id="loginForm" onsubmit="handleLogin(event)">
         <div class="form-group">
           <label>Phone Number</label>
-          <input type="tel" id="loginPhone" placeholder="9XXXXXXXXX" required>
+          <input type="tel" id="loginPhone" placeholder="09XXXXXXXXX" required>
         </div>
         <div class="form-group">
           <label>Password</label>
@@ -326,7 +376,7 @@
         </div>
         <div class="form-group">
           <label>Phone Number</label>
-          <input type="tel" id="regPhone" placeholder="9XXXXXXXXX" required>
+          <input type="tel" id="regPhone" placeholder="09XXXXXXXXX" required>
         </div>
         <div class="form-group">
           <label>Password</label>
