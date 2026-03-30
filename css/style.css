@@ -2691,3 +2691,123 @@ body.admin-mode .recharge-icon {
     width: 100%;
   }
 }
+
+/* ========================================
+   INSTALL APP BUTTON STYLES
+   ======================================== */
+.install-btn-header {
+  cursor: pointer;
+  font-size: 1.4rem;
+  color: #1d1d1f;
+  transition: 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.install-btn-header:hover {
+  color: #e63946;
+}
+
+/* Install Prompt Banner */
+.install-banner {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  right: 20px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+  z-index: 1000;
+  transform: translateY(100px);
+  opacity: 0;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  border: 1px solid #e9e9ef;
+}
+
+.install-banner.show {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.install-banner-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.install-banner-content .banner-icon {
+  font-size: 2rem;
+}
+
+.install-banner-content .banner-text {
+  flex: 1;
+}
+
+.install-banner-content .banner-text h4 {
+  font-size: 1rem;
+  margin-bottom: 4px;
+  color: #1d1d1f;
+}
+
+.install-banner-content .banner-text p {
+  font-size: 0.8rem;
+  color: #86868b;
+}
+
+.install-banner-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.install-btn-primary {
+  background: #e63946;
+  color: white;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 980px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.85rem;
+  transition: 0.2s;
+}
+
+.install-btn-primary:hover {
+  background: #ff6a3d;
+  transform: scale(1.02);
+}
+
+.install-btn-secondary {
+  background: transparent;
+  color: #86868b;
+  border: none;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: 0.2s;
+}
+
+.install-btn-secondary:hover {
+  color: #e63946;
+}
+
+@media (max-width: 768px) {
+  .install-banner {
+    left: 16px;
+    right: 16px;
+    bottom: 16px;
+  }
+  
+  .install-banner-content {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .install-banner-buttons {
+    width: 100%;
+    justify-content: center;
+  }
+}

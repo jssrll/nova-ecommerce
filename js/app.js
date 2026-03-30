@@ -1254,62 +1254,128 @@ function testLoginWithPhone(phone, password) {
 }
 
 // ========================================
-// PWA INSTALL PROMPT
+// PWA INSTALL APP FUNCTIONALITY
 // ========================================
 
 let deferredPrompt;
+let isAppInstalled = false;
 
+// Check if app is already installed
+window.addEventListener('appinstalled', () => {
+  isAppInstalled = true;
+  deferredPrompt = null;
+  hideInstallBanner();
+  console.log('App was installed');
+});
+
+// Detect if running in standalone mode (already installed)
+if (window.matchMedia('(display-mode: standalone)').matches) {
+  isAppInstalled = true;
+  console.log('Running as installed app');
+}
+
+// Listen for beforeinstallprompt event
 window.addEventListener('beforeinstallprompt', (e) => {
   // Prevent Chrome 67 and earlier from automatically showing the prompt
   e.preventDefault();
   // Stash the event so it can be triggered later
   deferredPrompt = e;
   
-  // Show install button (you can add this to your UI)
-  showInstallPromotion();
+  // Show install button in header
+  const installBtn = document.getElementById('installAppBtn');
+  if (installBtn && !isAppInstalled) {
+    installBtn.style.display = 'flex';
+  }
+  
+  // Show install banner
+  showInstallBanner();
 });
 
-function showInstallPromotion() {
-  // Create a toast or notification asking to install
-  setTimeout(() => {
-    const installToast = document.createElement('div');
-    installToast.className = 'install-toast';
-    installToast.innerHTML = `
-      <div class="install-toast-content">
-        <i class="fas fa-download"></i>
-        <span>Install NOVA as an app for better experience!</span>
-        <button class="install-btn" onclick="promptInstall()">Install</button>
-        <button class="close-toast" onclick="closeInstallToast()">×</button>
+// Show install banner
+function showInstallBanner() {
+  // Check if banner already exists
+  if (document.querySelector('.install-banner')) return;
+  if (isAppInstalled) return;
+  if (!deferredPrompt) return;
+  
+  const banner = document.createElement('div');
+  banner.className = 'install-banner';
+  banner.innerHTML = `
+    <div class="install-banner-content">
+      <div class="banner-icon">
+        <i class="fas fa-mobile-alt"></i>
       </div>
-    `;
-    document.body.appendChild(installToast);
-    setTimeout(() => {
-      installToast.classList.add('show');
-    }, 100);
-  }, 2000);
+      <div class="banner-text">
+        <h4>Install NOVA App</h4>
+        <p>Get a faster, app-like experience</p>
+      </div>
+      <div class="install-banner-buttons">
+        <button class="install-btn-secondary" onclick="dismissInstallBanner()">Not now</button>
+        <button class="install-btn-primary" onclick="promptInstallApp()">Install</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(banner);
+  
+  setTimeout(() => {
+    banner.classList.add('show');
+  }, 100);
 }
 
-function promptInstall() {
+function hideInstallBanner() {
+  const banner = document.querySelector('.install-banner');
+  if (banner) {
+    banner.classList.remove('show');
+    setTimeout(() => banner.remove(), 300);
+  }
+}
+
+function dismissInstallBanner() {
+  hideInstallBanner();
+  // Hide the header button too
+  const installBtn = document.getElementById('installAppBtn');
+  if (installBtn) {
+    installBtn.style.display = 'none';
+  }
+}
+
+function promptInstallApp() {
   if (deferredPrompt) {
     deferredPrompt.prompt();
     deferredPrompt.userChoice.then((choiceResult) => {
       if (choiceResult.outcome === 'accepted') {
         console.log('User accepted the install prompt');
+        isAppInstalled = true;
       } else {
         console.log('User dismissed the install prompt');
       }
       deferredPrompt = null;
+      hideInstallBanner();
+      const installBtn = document.getElementById('installAppBtn');
+      if (installBtn) {
+        installBtn.style.display = 'none';
+      }
     });
   }
-  closeInstallToast();
 }
 
-function closeInstallToast() {
-  const toast = document.querySelector('.install-toast');
-  if (toast) {
-    toast.classList.remove('show');
-    setTimeout(() => toast.remove(), 300);
+// Also add click handler for the header install button
+function initInstallButton() {
+  const installBtn = document.getElementById('installAppBtn');
+  if (installBtn) {
+    installBtn.addEventListener('click', () => {
+      if (deferredPrompt) {
+        promptInstallApp();
+      } else {
+        showToast('Your browser supports PWA. Try visiting this site on Chrome or Edge to install.', 3000);
+      }
+    });
   }
+}
+
+// Call this in your init function
+function initPWA() {
+  initInstallButton();
 }
 
 // ========================================
