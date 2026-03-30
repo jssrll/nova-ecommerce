@@ -631,7 +631,6 @@ function removeItem(itemId) {
   renderCartUI();
 }
 
-// UPDATED renderCartUI - Shows ONLY the final total, no "Saved" text
 function renderCartUI() {
   const cartListDiv = document.getElementById("cartItemsList");
   const totalSpan = document.getElementById("cartTotalPrice");
@@ -661,17 +660,13 @@ function renderCartUI() {
   }
   cartListDiv.innerHTML = html;
   let finalTotal = total;
-  
-  // Apply credit if user has balance - show ONLY the final total
   if (currentUser && (currentUser.balance || 0) > 0 && finalTotal > 0) {
     const creditToUse = Math.min(currentUser.balance, finalTotal);
     finalTotal = finalTotal - creditToUse;
-    // Show only the final total without the "Saved" text
-    if (totalSpan) totalSpan.innerText = `₱${finalTotal.toFixed(2)}`;
+    if (totalSpan) totalSpan.innerText = `₱${finalTotal.toFixed(2)} (Saved ₱${creditToUse} with credit)`;
   } else {
     if (totalSpan) totalSpan.innerText = `₱${total.toFixed(2)}`;
   }
-  
   document.querySelectorAll('.qty-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
