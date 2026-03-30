@@ -10,7 +10,7 @@ let isAdminMode = false;
 const ADMIN_PASSWORD = "nova2025";
 
 // Your Google Sheets Web App URL
-const GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbx2dwpXQ9ah8gNEGmAMvCAbaYukOc9ZZ-93tJrM__iDLiCEqHjxNdrJ9HDzwha5v4xkoA/exec";
+const GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbybiyhVhIni8DS7NWCPBZI-AnmrqUQE5U_6J582nqkJA7aJ8oEewLryTbvP4G8_4H0sdA/exec";
 
 // ========================================
 // HELPER FUNCTIONS
@@ -115,23 +115,16 @@ async function handleLogin(event) {
     const response = await fetch(`${GOOGLE_SHEETS_URL}?action=getUsers`);
     const users = await response.json();
     
-    console.log("Available users:", users);
-    console.log("Trying to login with phone:", phone, "password:", password);
-    
     const user = users.find(u => {
       const sheetPhone = u.phone.toString();
       const inputPhone = phone.toString();
-      
       if (sheetPhone === inputPhone) return true;
       if (inputPhone.startsWith('09') && sheetPhone === inputPhone.substring(1)) return true;
       if (sheetPhone.startsWith('09') && inputPhone === sheetPhone.substring(1)) return true;
-      
       return false;
     });
     
     if (user) {
-      console.log("✅ User found:", user);
-      
       currentUser = {
         id: user.accountId,
         name: user.name,
@@ -162,7 +155,6 @@ async function handleLogin(event) {
       closeAccountModal();
       renderCartUI();
     } else {
-      console.log("❌ No user found");
       showToast("Invalid phone number or password", 1500);
     }
   } catch (error) {
@@ -175,7 +167,7 @@ async function handleLogin(event) {
 }
 
 // ========================================
-// REGISTER FUNCTION WITH LOADING
+// REGISTER FUNCTION
 // ========================================
 async function handleRegister(event) {
   event.preventDefault();
@@ -314,7 +306,7 @@ async function addUserCredit(amount) {
 }
 
 // ========================================
-// ORDERS FUNCTIONS WITH LOADING
+// ORDERS FUNCTIONS
 // ========================================
 async function placeOrder() {
   if (!currentUser) {
@@ -330,11 +322,6 @@ async function placeOrder() {
   
   const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   const userBalance = currentUser.balance || 0;
-  
-  console.log("Placing order...");
-  console.log("Total:", total);
-  console.log("User Balance:", userBalance);
-  console.log("Cart items:", cart);
   
   if (userBalance < total) {
     showToast(`Insufficient balance! You have ₱${userBalance}, need ₱${total}`, 2000);
@@ -361,7 +348,6 @@ async function placeOrder() {
     });
     
     const balanceResult = await balanceResponse.json();
-    console.log("Balance update result:", balanceResult);
     
     if (!balanceResult.success) {
       showToast(balanceResult.message || "Failed to process payment", 1500);
@@ -386,7 +372,6 @@ async function placeOrder() {
     });
     
     const orderResult = await orderResponse.json();
-    console.log("Order save result:", orderResult);
     
     if (orderResult.success) {
       currentUser.balance = balanceResult.newBalance;
@@ -437,18 +422,11 @@ function viewOrderHistory() {
 }
 
 async function loadUserOrders() {
-  if (!currentUser) {
-    console.log("No current user");
-    return;
-  }
+  if (!currentUser) return;
   
   const ordersContainer = document.getElementById("ordersContainer");
-  if (!ordersContainer) {
-    console.log("Orders container not found!");
-    return;
-  }
+  if (!ordersContainer) return;
   
-  console.log("Loading orders for user:", currentUser.phone);
   ordersContainer.innerHTML = '<div style="text-align: center; padding: 40px;"><i class="fas fa-spinner fa-spin"></i> Loading orders...</div>';
   
   try {
@@ -462,8 +440,6 @@ async function loadUserOrders() {
     });
     
     const orders = await response.json();
-    console.log("Orders loaded:", orders);
-    console.log("Number of orders:", orders.length);
     
     if (!orders || orders.length === 0) {
       ordersContainer.innerHTML = `
@@ -481,29 +457,15 @@ async function loadUserOrders() {
       let statusIcon = '';
       
       switch((order.status || "Pending").toLowerCase()) {
-        case 'pending':
-          statusClass = 'status-pending';
-          statusIcon = '⏳';
-          break;
-        case 'approved':
-          statusClass = 'status-approved';
-          statusIcon = '✅';
-          break;
-        case 'completed':
-          statusClass = 'status-completed';
-          statusIcon = '🎉';
-          break;
-        case 'cancelled':
-          statusClass = 'status-cancelled';
-          statusIcon = '❌';
-          break;
-        default:
-          statusClass = 'status-pending';
-          statusIcon = '⏳';
+        case 'pending': statusClass = 'status-pending'; statusIcon = '⏳'; break;
+        case 'approved': statusClass = 'status-approved'; statusIcon = '✅'; break;
+        case 'completed': statusClass = 'status-completed'; statusIcon = '🎉'; break;
+        case 'cancelled': statusClass = 'status-cancelled'; statusIcon = '❌'; break;
+        default: statusClass = 'status-pending'; statusIcon = '⏳';
       }
       
       return `
-        <div class="order-card" data-timestamp="${order.timestamp}">
+        <div class="order-card">
           <div class="order-header">
             <span class="order-date">📅 ${new Date(order.timestamp).toLocaleString()}</span>
             <span class="order-status ${statusClass}">${statusIcon} ${order.status || "Pending"}</span>
@@ -511,9 +473,7 @@ async function loadUserOrders() {
           <div class="order-items">
             ${(order.orderList || "").split(', ').map(item => {
               const parts = item.split(' (₱');
-              return `<div class="order-item">
-                <span class="order-item-name">${parts[0]}</span>
-              </div>`;
+              return `<div class="order-item"><span class="order-item-name">${parts[0]}</span></div>`;
             }).join('')}
           </div>
           <div class="order-total">
@@ -526,13 +486,7 @@ async function loadUserOrders() {
     
   } catch (error) {
     console.error("Load orders error:", error);
-    ordersContainer.innerHTML = `
-      <div class="empty-orders">
-        <i class="fas fa-exclamation-circle" style="font-size: 4rem; color: #e63946; margin-bottom: 20px;"></i>
-        <p>Failed to load orders. Error: ${error.message}</p>
-        <button class="btn-primary-apple" onclick="loadUserOrders()" style="margin-top: 20px;">Try Again</button>
-      </div>
-    `;
+    ordersContainer.innerHTML = `<div class="empty-orders"><i class="fas fa-exclamation-circle"></i><p>Failed to load orders.</p></div>`;
   }
 }
 
@@ -600,11 +554,8 @@ function addToCart(productId) {
   
   setTimeout(() => {
     const existing = cart.find(item => item.id === productId);
-    if (existing) {
-      existing.quantity += 1;
-    } else {
-      cart.push({ id: product.id, name: product.name, price: product.price, image: product.image, quantity: 1 });
-    }
+    if (existing) existing.quantity += 1;
+    else cart.push({ id: product.id, name: product.name, price: product.price, image: product.image, quantity: 1 });
     updateCartBadge();
     saveCartToLocal();
     renderCartUI();
@@ -732,7 +683,7 @@ function renderProducts() {
 }
 
 // ========================================
-// FEATURED PAGE WITH LOADING
+// FEATURED PAGE
 // ========================================
 function loadFeaturedPage() {
   renderFeaturedProducts();
@@ -891,9 +842,7 @@ function initCartDrawer() {
     checkoutBtn.addEventListener('click', async () => {
       if (checkoutBtn.disabled) return;
       const success = await placeOrder();
-      if (success) {
-        closeDrawer();
-      }
+      if (success) closeDrawer();
     });
   }
 }
@@ -905,25 +854,25 @@ function initAccountIcon() {
   const accountIcon = document.getElementById('accountIcon');
   if (accountIcon) {
     accountIcon.addEventListener('click', () => {
-      if (currentUser) {
-        openProfileModal();
-      } else {
-        openAccountModal();
-      }
+      if (currentUser) openProfileModal();
+      else openAccountModal();
     });
   }
 }
 
 // ========================================
-// RECHARGE FUNCTIONS
+// RECHARGE FUNCTIONS WITH GCASH QR + POLLING
 // ========================================
+let activePaymentInterval = null;
+let paymentTimeout = null;
+let currentOrderId = null;
+
 function loadRechargePage() {
   if (!currentUser) {
     showToast("Please login to recharge credits", 1500);
     openAccountModal();
     return;
   }
-  
   updateRechargeBalance();
   loadRechargeHistory();
 }
@@ -935,100 +884,217 @@ function updateRechargeBalance() {
   }
 }
 
-async function rechargeCredits(amount) {
+function initiateGCashPayment(amount) {
   if (!currentUser) {
-    showToast("Please login to recharge credits", 1500);
+    showToast("Please login first", 1500);
     openAccountModal();
-    return false;
+    return;
   }
   
-  if (amount <= 0 || isNaN(amount)) {
-    showToast("Please enter a valid amount", 1500);
-    return false;
+  if (!amount || amount <= 0) {
+    showToast("Please select or enter a valid amount", 1500);
+    return;
   }
   
-  let clickedBtn = null;
-  const rechargeBtns = document.querySelectorAll('.recharge-amount-btn, .custom-amount-input button');
-  for (let btn of rechargeBtns) {
-    if (btn.contains(event?.target) || btn === event?.target) {
-      clickedBtn = btn;
-      break;
-    }
-  }
+  const orderId = `GCASH_${Date.now()}_${currentUser.id}_${Math.random().toString(36).substr(2, 6)}`;
+  currentOrderId = orderId;
   
-  const originalBtnText = clickedBtn ? clickedBtn.innerHTML : null;
+  document.getElementById('gcashQRModal').style.display = 'flex';
+  document.getElementById('qrPaymentAmount').innerHTML = `₱${amount.toLocaleString()}`;
+  document.getElementById('instructionAmount').innerHTML = `₱${amount.toLocaleString()}`;
   
-  if (clickedBtn) {
-    clickedBtn.disabled = true;
-    clickedBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
-  }
+  generateQRCode(amount, orderId);
+  createPendingPayment(orderId, amount);
+  startPaymentPolling(orderId, amount);
+  startPaymentTimer();
+}
+
+function generateQRCode(amount, orderId) {
+  const qrLoading = document.getElementById('qrLoading');
+  const qrImage = document.getElementById('qrCodeImage');
+  const gcashNumber = document.getElementById('gcashNumber').innerText;
+  const gcashName = document.getElementById('gcashName').innerText;
   
+  qrLoading.style.display = 'block';
+  qrImage.style.display = 'none';
+  
+  const paymentString = `gcash://pay?amount=${amount}&to=${gcashNumber}&name=${encodeURIComponent(gcashName)}&ref=${orderId}&note=NOVA%20Recharge`;
+  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(paymentString)}&margin=10`;
+  
+  qrImage.onload = () => {
+    qrLoading.style.display = 'none';
+    qrImage.style.display = 'block';
+  };
+  qrImage.onerror = () => {
+    qrImage.src = `https://chart.googleapis.com/chart?cht=qr&chs=250x250&chl=${encodeURIComponent(paymentString)}`;
+  };
+  qrImage.src = qrCodeUrl;
+}
+
+async function createPendingPayment(orderId, amount) {
   try {
     const formData = new URLSearchParams();
-    formData.append("action", "updateBalance");
-    formData.append("phone", currentUser.phone);
+    formData.append("action", "createPendingPayment");
+    formData.append("orderId", orderId);
     formData.append("amount", amount);
-    formData.append("operation", "add");
+    formData.append("userId", currentUser.id);
+    formData.append("userName", currentUser.name);
+    formData.append("userPhone", currentUser.phone);
+    formData.append("timestamp", new Date().toISOString());
+    formData.append("status", "PENDING");
     
-    const response = await fetch(GOOGLE_SHEETS_URL, {
-      method: "POST",
-      body: formData
-    });
+    await fetch(GOOGLE_SHEETS_URL, { method: "POST", body: formData });
+  } catch (error) {
+    console.error("Error creating pending payment:", error);
+  }
+}
+
+function startPaymentPolling(orderId, amount) {
+  let attempts = 0;
+  const maxAttempts = 60;
+  
+  if (activePaymentInterval) clearInterval(activePaymentInterval);
+  
+  activePaymentInterval = setInterval(async () => {
+    attempts++;
+    const remainingSeconds = (maxAttempts - attempts) * 5;
+    const minutes = Math.floor(remainingSeconds / 60);
+    const seconds = remainingSeconds % 60;
+    const timerElement = document.getElementById('paymentTimer');
+    if (timerElement) timerElement.innerHTML = `Time remaining: ${minutes}:${seconds.toString().padStart(2, '0')}`;
     
-    const result = await response.json();
+    const status = await checkPaymentStatus(orderId);
     
-    if (result.success) {
-      currentUser.balance = result.newBalance;
-      localStorage.setItem("nova_user", JSON.stringify(currentUser));
+    if (status.completed) {
+      clearInterval(activePaymentInterval);
+      clearTimeout(paymentTimeout);
+      activePaymentInterval = null;
       
-      const logData = new URLSearchParams();
-      logData.append("action", "addRechargeLog");
-      logData.append("timestamp", new Date().toISOString());
-      logData.append("accountId", currentUser.id);
-      logData.append("fullName", currentUser.name);
-      logData.append("phone", currentUser.phone);
-      logData.append("amount", amount);
-      
-      fetch(GOOGLE_SHEETS_URL, {
-        method: "POST",
-        body: logData
-      }).catch(err => console.error("Recharge logging error:", err));
-      
+      showPaymentSuccess(amount);
+      await addUserCredit(amount);
       updateRechargeBalance();
       loadRechargeHistory();
-      renderCartUI();
-      showToast(`✅ Successfully recharged ₱${amount.toLocaleString()}! New balance: ₱${currentUser.balance.toLocaleString()}`, 3000);
-      return true;
-    } else {
-      showToast(result.message || "Recharge failed. Please try again.", 1500);
-      return false;
+      
+      setTimeout(() => closeGCashQRModal(), 3000);
+    } else if (status.failed || attempts >= maxAttempts) {
+      clearInterval(activePaymentInterval);
+      clearTimeout(paymentTimeout);
+      activePaymentInterval = null;
+      showPaymentTimeout();
     }
+  }, 5000);
+  
+  paymentTimeout = setTimeout(() => {
+    if (activePaymentInterval) {
+      clearInterval(activePaymentInterval);
+      activePaymentInterval = null;
+      showPaymentTimeout();
+    }
+  }, 300000);
+}
+
+async function checkPaymentStatus(orderId) {
+  try {
+    const response = await fetch(`${GOOGLE_SHEETS_URL}?action=getPaymentStatus&orderId=${orderId}`);
+    return await response.json();
   } catch (error) {
-    console.error("Recharge error:", error);
-    showToast("Recharge failed. Please try again.", 1500);
-    return false;
-  } finally {
-    if (clickedBtn) {
-      clickedBtn.disabled = false;
-      clickedBtn.innerHTML = originalBtnText;
+    return { completed: false, failed: false };
+  }
+}
+
+function showPaymentSuccess(amount) {
+  const paymentStatus = document.getElementById('paymentStatus');
+  const qrCodeContainer = document.querySelector('.qr-code-container');
+  const instructions = document.querySelector('.payment-instructions');
+  const gcashDetails = document.querySelector('.gcash-details');
+  const cancelBtn = document.querySelector('.cancel-payment');
+  
+  if (qrCodeContainer) qrCodeContainer.style.display = 'none';
+  if (instructions) instructions.style.display = 'none';
+  if (gcashDetails) gcashDetails.style.display = 'none';
+  if (cancelBtn) cancelBtn.style.display = 'none';
+  
+  if (paymentStatus) {
+    paymentStatus.style.display = 'block';
+    paymentStatus.className = 'payment-status success';
+    paymentStatus.innerHTML = `
+      <div class="status-icon"><i class="fas fa-check-circle"></i></div>
+      <div class="status-text">✅ Payment Successful!</div>
+      <div class="status-detail">₱${amount.toLocaleString()} has been added to your balance.</div>
+    `;
+  }
+  showToast(`✅ Payment successful! ₱${amount.toLocaleString()} added to your balance!`, 4000);
+}
+
+function showPaymentTimeout() {
+  const paymentStatus = document.getElementById('paymentStatus');
+  if (paymentStatus) {
+    paymentStatus.style.display = 'block';
+    paymentStatus.className = 'payment-status failed';
+    paymentStatus.innerHTML = `
+      <div class="status-icon"><i class="fas fa-clock"></i></div>
+      <div class="status-text">⏰ Payment Timeout</div>
+      <div class="status-detail">Payment verification timed out. Please contact support.</div>
+      <button class="btn-primary-apple" onclick="closeGCashQRModal()" style="margin-top: 15px;">Close</button>
+    `;
+  }
+  showToast("Payment verification timed out. Please contact support if you paid.", 3000);
+}
+
+function startPaymentTimer() {
+  let timeLeft = 300;
+  const timerInterval = setInterval(() => {
+    if (!document.getElementById('gcashQRModal') || document.getElementById('gcashQRModal').style.display !== 'flex') {
+      clearInterval(timerInterval);
+      return;
     }
+    const minutes = Math.floor(timeLeft / 60);
+    const seconds = timeLeft % 60;
+    const timerElement = document.getElementById('paymentTimer');
+    if (timerElement) timerElement.innerHTML = `Time remaining: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+    timeLeft--;
+    if (timeLeft < 0) clearInterval(timerInterval);
+  }, 1000);
+}
+
+function closeGCashQRModal() {
+  if (activePaymentInterval) clearInterval(activePaymentInterval);
+  if (paymentTimeout) clearTimeout(paymentTimeout);
+  activePaymentInterval = null;
+  paymentTimeout = null;
+  
+  document.getElementById('gcashQRModal').style.display = 'none';
+  document.getElementById('qrLoading').style.display = 'block';
+  document.getElementById('qrCodeImage').style.display = 'none';
+  document.getElementById('paymentStatus').style.display = 'none';
+  const qrContainer = document.querySelector('.qr-code-container');
+  const instructions = document.querySelector('.payment-instructions');
+  const gcashDetails = document.querySelector('.gcash-details');
+  const cancelBtn = document.querySelector('.cancel-payment');
+  if (qrContainer) qrContainer.style.display = 'flex';
+  if (instructions) instructions.style.display = 'block';
+  if (gcashDetails) gcashDetails.style.display = 'block';
+  if (cancelBtn) cancelBtn.style.display = 'block';
+  currentOrderId = null;
+}
+
+function cancelPayment() {
+  if (confirm('Are you sure you want to cancel this payment?')) {
+    closeGCashQRModal();
+    showToast("Payment cancelled", 1500);
   }
 }
 
 function rechargeAmount(amount) {
-  rechargeCredits(amount);
+  initiateGCashPayment(amount);
 }
 
 function rechargeCustomAmount() {
   const amountInput = document.getElementById("customRechargeAmount");
   const amount = parseInt(amountInput.value);
-  
   if (amount && amount > 0) {
-    rechargeCredits(amount).then(success => {
-      if (success) {
-        amountInput.value = "";
-      }
-    });
+    initiateGCashPayment(amount);
+    amountInput.value = "";
   } else {
     showToast("Please enter a valid amount (minimum ₱1)", 1500);
   }
@@ -1036,7 +1102,6 @@ function rechargeCustomAmount() {
 
 async function loadRechargeHistory() {
   if (!currentUser) return;
-  
   const container = document.getElementById("rechargeHistoryContainer");
   if (!container) return;
   
@@ -1053,15 +1118,12 @@ async function loadRechargeHistory() {
     
     let html = "";
     logs.forEach(log => {
-      html += `
-        <div class="recharge-history-item">
-          <span class="recharge-date">${new Date(log.timestamp).toLocaleString()}</span>
-          <span class="recharge-amount">+₱${parseFloat(log.amount).toLocaleString()}</span>
-        </div>
-      `;
+      html += `<div class="recharge-history-item">
+        <span class="recharge-date">${new Date(log.timestamp).toLocaleString()}</span>
+        <span class="recharge-amount">+₱${parseFloat(log.amount).toLocaleString()}</span>
+      </div>`;
     });
     container.innerHTML = html;
-    
   } catch (error) {
     console.error("Load recharge history error:", error);
     container.innerHTML = '<div class="empty-history">Failed to load history.</div>';
@@ -1111,71 +1173,45 @@ function exitAdminMode() {
 
 function initAdminIcon() {
   const adminIcon = document.getElementById('adminIcon');
-  if (adminIcon) {
-    adminIcon.addEventListener('click', () => {
-      toggleAdminMode();
-    });
-  }
-  
+  if (adminIcon) adminIcon.addEventListener('click', () => toggleAdminMode());
   const adminExitBtn = document.getElementById('adminExitBtn');
-  if (adminExitBtn) {
-    adminExitBtn.addEventListener('click', () => {
-      exitAdminMode();
-    });
-  }
+  if (adminExitBtn) adminExitBtn.addEventListener('click', () => exitAdminMode());
 }
 
 // ========================================
 // ADMIN DATA FUNCTIONS
 // ========================================
 function switchAdminTab(tabName) {
-  document.querySelectorAll('.admin-tab-btn').forEach(btn => {
-    btn.classList.remove('active');
-  });
+  document.querySelectorAll('.admin-tab-btn').forEach(btn => btn.classList.remove('active'));
   if (event && event.target) event.target.classList.add('active');
-  
-  document.querySelectorAll('.admin-tab').forEach(tab => {
-    tab.classList.remove('active');
-  });
+  document.querySelectorAll('.admin-tab').forEach(tab => tab.classList.remove('active'));
   document.getElementById(`admin${tabName.charAt(0).toUpperCase() + tabName.slice(1)}Tab`).classList.add('active');
   
-  if (tabName === 'orders') {
-    loadAdminOrders();
-  } else if (tabName === 'logs') {
-    loadAdminLogs();
-  } else if (tabName === 'users') {
-    loadAdminUsers();
-  } else if (tabName === 'redemptions') {
-    loadAdminRedemptions();
-  }
+  if (tabName === 'orders') loadAdminOrders();
+  else if (tabName === 'logs') loadAdminLogs();
+  else if (tabName === 'users') loadAdminUsers();
+  else if (tabName === 'redemptions') loadAdminRedemptions();
+  else if (tabName === 'payments') loadAdminPayments();
 }
 
 async function loadAdminData() {
-  await Promise.all([
-    loadAdminOrders(),
-    loadAdminLogs(),
-    loadAdminUsers(),
-    loadAdminRedemptions()
-  ]);
+  await Promise.all([loadAdminOrders(), loadAdminLogs(), loadAdminUsers(), loadAdminRedemptions(), loadAdminPayments()]);
 }
 
 async function loadAdminOrders() {
   const container = document.getElementById("adminOrdersContainer");
   if (!container) return;
-  
   container.innerHTML = '<div style="text-align: center; padding: 40px;"><i class="fas fa-spinner fa-spin"></i> Loading orders...</div>';
   
   try {
     const response = await fetch(`${GOOGLE_SHEETS_URL}?action=getAllOrders`);
     const orders = await response.json();
-    
     if (!orders || orders.length === 0) {
       container.innerHTML = '<div style="text-align: center; padding: 40px;">No orders found.</div>';
       return;
     }
     
-    let html = '<div class="admin-table-wrapper"><table class="admin-table"><thead><tr><th>Timestamp</th><th>Account ID</th><th>Full Name</th><th>Phone</th><th>Order List</th><th>Total</th><th>Status</th><th>Action</th></tr></thead><tbody>';
-    
+    let html = '<table class="admin-table"><thead><tr><th>Timestamp</th><th>Account ID</th><th>Full Name</th><th>Phone</th><th>Order List</th><th>Total</th><th>Status</th><th>Action</th></tr></thead><tbody>';
     orders.forEach(order => {
       let statusClass = '';
       switch(order.status?.toLowerCase()) {
@@ -1185,38 +1221,29 @@ async function loadAdminOrders() {
         case 'cancelled': statusClass = 'status-cancelled'; break;
         default: statusClass = 'status-pending';
       }
-      
-      const safeTimestamp = (order.timestamp || '').replace(/'/g, "\\'");
-      const safePhone = (order.phone || '').replace(/'/g, "\\'");
-      
-      html += `
-        <tr data-timestamp="${order.timestamp}" data-phone="${order.phone}">
-          <td>${new Date(order.timestamp).toLocaleString()}</td>
-          <td>${escapeHtml(order.accountId) || '-'}</td>
-          <td>${escapeHtml(order.fullName) || '-'}</td>
-          <td>${escapeHtml(order.phone) || '-'}</td>
-          <td style="max-width: 200px; word-break: break-word;">${escapeHtml(order.orderList) || '-'}</td>
-          <td>₱${parseFloat(order.totalPrice || 0).toLocaleString()}</td>
-          <td><span class="status-badge ${statusClass}">${order.status || 'Pending'}</span></td>
-          <td class="admin-action-cell">
-            <select class="update-status-select" data-timestamp="${order.timestamp}" data-phone="${order.phone}">
-              <option value="Pending" ${order.status === 'Pending' ? 'selected' : ''}>Pending</option>
-              <option value="Approved" ${order.status === 'Approved' ? 'selected' : ''}>Approved</option>
-              <option value="Completed" ${order.status === 'Completed' ? 'selected' : ''}>Completed</option>
-              <option value="Cancelled" ${order.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
-            </select>
-            <button class="update-status-btn" onclick="updateOrderStatusFromAdmin('${safeTimestamp}', '${safePhone}')">Update</button>
-          </td>
-        </tr>
-      `;
+      html += `<tr>
+        <td>${new Date(order.timestamp).toLocaleString()}</td>
+        <td>${escapeHtml(order.accountId) || '-'}</td>
+        <td>${escapeHtml(order.fullName) || '-'}</td>
+        <td>${escapeHtml(order.phone) || '-'}</td>
+        <td style="max-width:200px;word-break:break-word;">${escapeHtml(order.orderList) || '-'}</td>
+        <td>₱${parseFloat(order.totalPrice || 0).toLocaleString()}</td>
+        <td><span class="status-badge ${statusClass}">${order.status || 'Pending'}</span></td>
+        <td>
+          <select class="update-status-select" data-timestamp="${order.timestamp}" data-phone="${order.phone}">
+            <option value="Pending" ${order.status === 'Pending' ? 'selected' : ''}>Pending</option>
+            <option value="Approved" ${order.status === 'Approved' ? 'selected' : ''}>Approved</option>
+            <option value="Completed" ${order.status === 'Completed' ? 'selected' : ''}>Completed</option>
+            <option value="Cancelled" ${order.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
+          </select>
+          <button class="update-status-btn" onclick="updateOrderStatusFromAdmin('${order.timestamp.replace(/'/g, "\\'")}', '${order.phone.replace(/'/g, "\\'")}')">Update</button>
+        </td>
+      </tr>`;
     });
-    
-    html += '</tbody></table></div>';
+    html += '</tbody></table>';
     container.innerHTML = html;
-    
   } catch (error) {
-    console.error("Load admin orders error:", error);
-    container.innerHTML = '<div style="text-align: center; padding: 40px;">Failed to load orders. Please try again.</div>';
+    container.innerHTML = '<div style="text-align: center; padding: 40px;">Failed to load orders.</div>';
   }
 }
 
@@ -1225,13 +1252,9 @@ async function updateOrderStatusFromAdmin(timestamp, phone) {
   const row = select?.closest('tr');
   const updateBtn = row?.querySelector('.update-status-btn');
   const newStatus = select?.value;
+  if (!updateBtn) return;
   
-  if (!updateBtn || !select) {
-    showToast("Error: Could not find order elements", 1500);
-    return;
-  }
-  
-  const originalBtnText = updateBtn.innerHTML;
+  const originalText = updateBtn.innerHTML;
   updateBtn.disabled = true;
   updateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
   
@@ -1241,163 +1264,160 @@ async function updateOrderStatusFromAdmin(timestamp, phone) {
     formData.append("timestamp", timestamp);
     formData.append("phone", phone);
     formData.append("status", newStatus);
-    
-    const response = await fetch(GOOGLE_SHEETS_URL, {
-      method: "POST",
-      body: formData
-    });
-    
+    const response = await fetch(GOOGLE_SHEETS_URL, { method: "POST", body: formData });
     const result = await response.json();
-    
     if (result.success) {
       showToast(`Order status updated to: ${newStatus}`, 1500);
       await loadAdminOrders();
     } else {
-      showToast(result.message || "Failed to update order status", 1500);
       updateBtn.disabled = false;
-      updateBtn.innerHTML = originalBtnText;
+      updateBtn.innerHTML = originalText;
     }
   } catch (error) {
-    console.error("Update order status error:", error);
-    showToast("Failed to update order status. Please try again.", 1500);
     updateBtn.disabled = false;
-    updateBtn.innerHTML = originalBtnText;
+    updateBtn.innerHTML = originalText;
   }
 }
 
 async function loadAdminLogs() {
   const container = document.getElementById("adminLogsContainer");
   if (!container) return;
-  
   container.innerHTML = '<div style="text-align: center; padding: 40px;"><i class="fas fa-spinner fa-spin"></i> Loading logs...</div>';
-  
   try {
     const response = await fetch(`${GOOGLE_SHEETS_URL}?action=getLoginLogs`);
     const logs = await response.json();
-    
     if (!logs || logs.length === 0) {
       container.innerHTML = '<div style="text-align: center; padding: 40px;">No login logs found.</div>';
       return;
     }
-    
-    let html = '<div class="admin-table-wrapper"><table class="admin-table"><thead><tr><th>Timestamp</th><th>Account ID</th><th>Full Name</th><th>Phone</th><th>Password</th><th>Status</th></tr></thead><tbody>';
-    
+    let html = '<table class="admin-table"><thead><tr><th>Timestamp</th><th>Account ID</th><th>Full Name</th><th>Phone</th><th>Password</th><th>Status</th></tr></thead><tbody>';
     logs.forEach(log => {
-      html += `
-        <tr>
-          <td>${new Date(log.timestamp).toLocaleString()}</td>
-          <td>${escapeHtml(log.accountId) || '-'}</td>
-          <td>${escapeHtml(log.fullName) || '-'}</td>
-          <td>${escapeHtml(log.phone) || '-'}</td>
-          <td>${escapeHtml(log.password) || '-'}</td>
-          <td><span class="status-badge status-approved">${log.status || 'Success'}</span></td>
-        </tr>
-      `;
+      html += `<tr><td>${new Date(log.timestamp).toLocaleString()}</td><td>${escapeHtml(log.accountId) || '-'}</td><td>${escapeHtml(log.fullName) || '-'}</td><td>${escapeHtml(log.phone) || '-'}</td><td>${escapeHtml(log.password) || '-'}</td><td><span class="status-badge status-approved">${log.status || 'Success'}</span></td></tr>`;
     });
-    
-    html += '</tbody></table></div>';
+    html += '</tbody></table>';
     container.innerHTML = html;
-    
   } catch (error) {
-    console.error("Load admin logs error:", error);
-    container.innerHTML = '<div style="text-align: center; padding: 40px;">Failed to load logs. Please try again.</div>';
+    container.innerHTML = '<div style="text-align: center; padding: 40px;">Failed to load logs.</div>';
   }
 }
 
 async function loadAdminUsers() {
   const container = document.getElementById("adminUsersContainer");
   if (!container) return;
-  
   container.innerHTML = '<div style="text-align: center; padding: 40px;"><i class="fas fa-spinner fa-spin"></i> Loading users...</div>';
-  
   try {
     const response = await fetch(`${GOOGLE_SHEETS_URL}?action=getUsers`);
     const users = await response.json();
-    
     if (!users || users.length === 0) {
       container.innerHTML = '<div style="text-align: center; padding: 40px;">No users found.</div>';
       return;
     }
-    
-    let html = '<div class="admin-table-wrapper"><table class="admin-table"><thead><tr><th>Account ID</th><th>Full Name</th><th>Phone</th><th>Balance</th></tr></thead><tbody>';
-    
+    let html = '<table class="admin-table"><thead><tr><th>Account ID</th><th>Full Name</th><th>Phone</th><th>Balance</th></tr></thead><tbody>';
     users.forEach(user => {
-      html += `
-        <tr>
-          <td>${escapeHtml(user.accountId) || '-'}</td>
-          <td>${escapeHtml(user.name) || '-'}</td>
-          <td>${escapeHtml(user.phone) || '-'}</td>
-          <td>₱${(user.balance || 0).toLocaleString()}</td>
-        </tr>
-      `;
+      html += `<tr><td>${escapeHtml(user.accountId) || '-'}</td><td>${escapeHtml(user.name) || '-'}</td><td>${escapeHtml(user.phone) || '-'}</td><td>₱${(user.balance || 0).toLocaleString()}</td></tr>`;
     });
-    
-    html += '</tbody></table></div>';
+    html += '</tbody></table>';
     container.innerHTML = html;
-    
   } catch (error) {
-    console.error("Load admin users error:", error);
-    container.innerHTML = '<div style="text-align: center; padding: 40px;">Failed to load users. Please try again.</div>';
+    container.innerHTML = '<div style="text-align: center; padding: 40px;">Failed to load users.</div>';
   }
 }
 
 async function loadAdminRedemptions() {
   const container = document.getElementById("adminRedemptionsContainer");
   if (!container) return;
-  
   container.innerHTML = '<div style="text-align: center; padding: 40px;"><i class="fas fa-spinner fa-spin"></i> Loading redemptions...</div>';
-  
   try {
     const response = await fetch(`${GOOGLE_SHEETS_URL}?action=getRedemptions`);
     const redemptions = await response.json();
-    
     if (!redemptions || redemptions.length === 0) {
       container.innerHTML = '<div style="text-align: center; padding: 40px;">No code redemptions found.</div>';
       return;
     }
-    
-    let html = '<div class="admin-table-wrapper"><table class="admin-table"><thead><tr><th>Timestamp</th><th>Account ID</th><th>Full Name</th><th>Phone</th><th>Code Input</th><th>Reward</th></tr></thead><tbody>';
-    
-    redemptions.forEach(redemption => {
-      html += `
-        <tr>
-          <td>${new Date(redemption.timestamp).toLocaleString()}</td>
-          <td>${escapeHtml(redemption.accountId) || '-'}</td>
-          <td>${escapeHtml(redemption.fullName) || '-'}</td>
-          <td>${escapeHtml(redemption.phone) || '-'}</td>
-          <td><code>${escapeHtml(redemption.codeInput) || '-'}</code></td>
-          <td>${escapeHtml(redemption.reward) || '-'}</td>
-        </tr>
-      `;
+    let html = '<table class="admin-table"><thead><tr><th>Timestamp</th><th>Account ID</th><th>Full Name</th><th>Phone</th><th>Code Input</th><th>Reward</th></tr></thead><tbody>';
+    redemptions.forEach(red => {
+      html += `<tr><td>${new Date(red.timestamp).toLocaleString()}</td><td>${escapeHtml(red.accountId) || '-'}</td><td>${escapeHtml(red.fullName) || '-'}</td><td>${escapeHtml(red.phone) || '-'}</td><td><code>${escapeHtml(red.codeInput) || '-'}</code></td><td>${escapeHtml(red.reward) || '-'}</td></tr>`;
     });
-    
-    html += '</tbody></table></div>';
+    html += '</tbody></table>';
     container.innerHTML = html;
-    
   } catch (error) {
-    console.error("Load admin redemptions error:", error);
-    container.innerHTML = '<div style="text-align: center; padding: 40px;">Failed to load redemptions. Please try again.</div>';
+    container.innerHTML = '<div style="text-align: center; padding: 40px;">Failed to load redemptions.</div>';
   }
 }
 
-function refreshAdminOrders() {
-  loadAdminOrders();
+async function loadAdminPayments() {
+  const container = document.getElementById("adminPaymentsContainer");
+  if (!container) return;
+  container.innerHTML = '<div style="text-align: center; padding: 40px;"><i class="fas fa-spinner fa-spin"></i> Loading pending payments...</div>';
+  try {
+    const response = await fetch(`${GOOGLE_SHEETS_URL}?action=getPendingPayments`);
+    const payments = await response.json();
+    if (!payments || payments.length === 0) {
+      container.innerHTML = '<div style="text-align: center; padding: 40px;">No pending payments.</div>';
+      return;
+    }
+    let html = '<table class="admin-table"><thead><tr><th>Order ID</th><th>Timestamp</th><th>User</th><th>Phone</th><th>Amount</th><th>Status</th><th>Action</th></tr></thead><tbody>';
+    payments.forEach(payment => {
+      html += `<tr>
+        <td><code>${payment.orderId}</code></td>
+        <td>${new Date(payment.timestamp).toLocaleString()}</td>
+        <td>${escapeHtml(payment.userName)}</td>
+        <td>${escapeHtml(payment.userPhone)}</td>
+        <td>₱${parseFloat(payment.amount).toLocaleString()}</td>
+        <td><span class="status-badge status-pending">${payment.status}</span></td>
+        <td><button class="confirm-payment-btn" onclick="confirmPaymentFromAdmin('${payment.orderId}', '${payment.userPhone}', ${payment.amount}, '${payment.userId}', '${escapeHtml(payment.userName)}')">Confirm Payment</button></td>
+      </tr>`;
+    });
+    html += '</tbody></table>';
+    container.innerHTML = html;
+  } catch (error) {
+    container.innerHTML = '<div style="text-align: center; padding: 40px;">Failed to load payments.</div>';
+  }
 }
 
-function refreshAdminLogs() {
-  loadAdminLogs();
+async function confirmPaymentFromAdmin(orderId, phone, amount, userId, userName) {
+  if (!confirm(`Confirm payment of ₱${amount.toLocaleString()} for ${userName}?`)) return;
+  
+  const btn = event.target;
+  const originalText = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+  
+  try {
+    const formData = new URLSearchParams();
+    formData.append("action", "confirmPayment");
+    formData.append("orderId", orderId);
+    formData.append("phone", phone);
+    formData.append("amount", amount);
+    formData.append("accountId", userId);
+    formData.append("fullName", userName);
+    
+    const response = await fetch(GOOGLE_SHEETS_URL, { method: "POST", body: formData });
+    const result = await response.json();
+    
+    if (result.success) {
+      showToast(`Payment confirmed! ₱${amount} added to ${userName}'s account.`, 3000);
+      await loadAdminPayments();
+    } else {
+      showToast("Failed to confirm payment", 1500);
+      btn.disabled = false;
+      btn.innerHTML = originalText;
+    }
+  } catch (error) {
+    showToast("Error confirming payment", 1500);
+    btn.disabled = false;
+    btn.innerHTML = originalText;
+  }
 }
 
-function refreshAdminUsers() {
-  loadAdminUsers();
-}
-
-function refreshAdminRedemptions() {
-  loadAdminRedemptions();
-}
+function refreshAdminOrders() { loadAdminOrders(); }
+function refreshAdminLogs() { loadAdminLogs(); }
+function refreshAdminUsers() { loadAdminUsers(); }
+function refreshAdminRedemptions() { loadAdminRedemptions(); }
+function refreshAdminPayments() { loadAdminPayments(); }
 
 // ========================================
-// NEWSLETTER
+// NEWSLETTER & TEST LOGIN
 // ========================================
 function subscribeNewsletter() {
   const email = document.getElementById("newsletterEmail");
@@ -1409,29 +1429,12 @@ function subscribeNewsletter() {
   }
 }
 
-// ========================================
-// TEST LOGIN FUNCTION
-// ========================================
 function testLoginWithPhone(phone, password) {
-  console.log("Testing login with:", phone, password);
   fetch(`${GOOGLE_SHEETS_URL}?action=getUsers`)
     .then(res => res.json())
     .then(users => {
-      const user = users.find(u => {
-        const sheetPhone = u.phone.toString();
-        const inputPhone = phone.toString();
-        if (sheetPhone === inputPhone) return true;
-        if (inputPhone.startsWith('09') && sheetPhone === inputPhone.substring(1)) return true;
-        if (sheetPhone.startsWith('09') && inputPhone === sheetPhone.substring(1)) return true;
-        return false;
-      });
-      if (user) {
-        console.log("✅ Login would work!", user);
-        alert(`Login would work! User: ${user.name}`);
-      } else {
-        console.log("❌ Login would fail");
-        alert("Login would fail. Check console for available users.");
-      }
+      const user = users.find(u => u.phone === phone && u.password === password);
+      alert(user ? `✅ Login works! User: ${user.name}` : "❌ Login would fail");
     });
 }
 
@@ -1454,8 +1457,7 @@ function init() {
   document.querySelectorAll('.nav-link').forEach(link => {
     link.addEventListener('click', (e) => {
       e.preventDefault();
-      const page = link.getAttribute('data-page');
-      switchPage(page);
+      switchPage(link.getAttribute('data-page'));
     });
   });
   
@@ -1488,17 +1490,19 @@ function init() {
   window.viewOrderHistory = viewOrderHistory;
   window.loadUserOrders = loadUserOrders;
   window.toggleAdminMode = toggleAdminMode;
-  window.enterAdminMode = enterAdminMode;
-  window.exitAdminMode = exitAdminMode;
   window.switchAdminTab = switchAdminTab;
   window.updateOrderStatusFromAdmin = updateOrderStatusFromAdmin;
   window.refreshAdminOrders = refreshAdminOrders;
   window.refreshAdminLogs = refreshAdminLogs;
   window.refreshAdminUsers = refreshAdminUsers;
   window.refreshAdminRedemptions = refreshAdminRedemptions;
+  window.refreshAdminPayments = refreshAdminPayments;
+  window.confirmPaymentFromAdmin = confirmPaymentFromAdmin;
   window.rechargeAmount = rechargeAmount;
   window.rechargeCustomAmount = rechargeCustomAmount;
-  window.loadRechargePage = loadRechargePage;
+  window.cancelPayment = cancelPayment;
+  window.closeGCashQRModal = closeGCashQRModal;
+  window.initiateGCashPayment = initiateGCashPayment;
 }
 
 document.addEventListener('DOMContentLoaded', init);

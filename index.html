@@ -202,48 +202,46 @@
   <div id="rechargePage" class="page">
     <div class="page-hero">
       <h1><i class="fas fa-coins"></i> Credit Recharge</h1>
-      <p>Add credits to your account to use for purchases</p>
+      <p>Add credits to your account using GCash</p>
     </div>
     
     <div class="recharge-container">
-      <div class="recharge-card">
-        <div class="current-balance">
-          <h3>Current Balance</h3>
-          <div class="balance-amount" id="rechargeBalance">₱0</div>
-        </div>
-        
-        <div class="recharge-options">
-          <h3>Select Amount to Recharge</h3>
-          <div class="recharge-amounts">
-            <button class="recharge-amount-btn" onclick="rechargeAmount(10)">₱10</button>
-            <button class="recharge-amount-btn" onclick="rechargeAmount(20)">₱20</button>
-            <button class="recharge-amount-btn" onclick="rechargeAmount(50)">₱50</button>
-            <button class="recharge-amount-btn" onclick="rechargeAmount(100)">₱100</button>
-            <button class="recharge-amount-btn" onclick="rechargeAmount(200)">₱200</button>
-            <button class="recharge-amount-btn" onclick="rechargeAmount(500)">₱500</button>
-          </div>
-        </div>
-        
-        <div class="custom-amount">
-          <h3>Or Enter Custom Amount</h3>
-          <div class="custom-amount-input">
-            <input type="number" id="customRechargeAmount" placeholder="Enter amount" min="1" step="1">
-            <button class="btn-primary-apple" onclick="rechargeCustomAmount()">Recharge</button>
-          </div>
-        </div>
-        
-        <div class="recharge-note">
-          <i class="fas fa-info-circle"></i>
-          <p>Credits will be added to your balance instantly and can be used for purchases.</p>
+      <div class="current-balance">
+        <h3>Current Balance</h3>
+        <div class="balance-amount" id="rechargeBalance">₱0</div>
+      </div>
+      
+      <div class="recharge-options">
+        <h3>Select Amount to Recharge</h3>
+        <div class="recharge-amounts">
+          <button class="recharge-amount-btn" data-amount="10">₱10</button>
+          <button class="recharge-amount-btn" data-amount="20">₱20</button>
+          <button class="recharge-amount-btn" data-amount="50">₱50</button>
+          <button class="recharge-amount-btn" data-amount="100">₱100</button>
+          <button class="recharge-amount-btn" data-amount="200">₱200</button>
+          <button class="recharge-amount-btn" data-amount="500">₱500</button>
         </div>
       </div>
       
-      <!-- Recharge History -->
-      <div class="recharge-history">
-        <h3>Recharge History</h3>
-        <div id="rechargeHistoryContainer" class="recharge-history-list">
-          <div class="empty-history">No recharge history yet.</div>
+      <div class="custom-amount">
+        <h3>Or Enter Custom Amount</h3>
+        <div class="custom-amount-input">
+          <input type="number" id="customRechargeAmount" placeholder="Enter amount" min="1" step="1">
+          <button class="btn-primary-apple" onclick="rechargeCustomAmount()">Recharge</button>
         </div>
+      </div>
+      
+      <div class="recharge-note">
+        <i class="fas fa-info-circle"></i>
+        <p>Pay via GCash QR code. Credits will be added automatically after payment confirmation.</p>
+      </div>
+    </div>
+    
+    <!-- Recharge History -->
+    <div class="recharge-history">
+      <h3>Recharge History</h3>
+      <div id="rechargeHistoryContainer" class="recharge-history-list">
+        <div class="empty-history">No recharge history yet.</div>
       </div>
     </div>
   </div>
@@ -260,6 +258,7 @@
       <button class="admin-tab-btn" onclick="switchAdminTab('logs')">📋 Login Logs</button>
       <button class="admin-tab-btn" onclick="switchAdminTab('users')">👥 User Management</button>
       <button class="admin-tab-btn" onclick="switchAdminTab('redemptions')">🎫 Code Redemptions</button>
+      <button class="admin-tab-btn" onclick="switchAdminTab('payments')">💰 Pending Payments</button>
     </div>
     
     <!-- Orders Management Tab -->
@@ -317,6 +316,20 @@
         </div>
       </div>
     </div>
+    
+    <!-- Pending Payments Tab -->
+    <div id="adminPaymentsTab" class="admin-tab">
+      <div class="admin-actions">
+        <button class="btn-secondary-apple" onclick="refreshAdminPayments()">
+          <i class="fas fa-sync-alt"></i> Refresh Payments
+        </button>
+      </div>
+      <div id="adminPaymentsContainer" class="admin-payments-container">
+        <div style="text-align: center; padding: 40px;">
+          <i class="fas fa-spinner fa-spin"></i> Loading pending payments...
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- HELP PAGE -->
@@ -331,7 +344,7 @@
       <div class="faq-list-apple">
         <div class="faq-item-apple"><div class="faq-question-apple" onclick="toggleFAQ(this)"><span>How do I track my order?</span><i class="fas fa-chevron-down"></i></div><div class="faq-answer-apple">You can track your order in the Shop page after logging into your account. Order status is updated in real-time.</div></div>
         <div class="faq-item-apple"><div class="faq-question-apple" onclick="toggleFAQ(this)"><span>How do I redeem a promo code?</span><i class="fas fa-chevron-down"></i></div><div class="faq-answer-apple">Go to the Featured page, enter your code in the Code Redemption section, and click Redeem to claim your rewards instantly.</div></div>
-        <div class="faq-item-apple"><div class="faq-question-apple" onclick="toggleFAQ(this)"><span>How do I earn credits?</span><i class="fas fa-chevron-down"></i></div><div class="faq-answer-apple">You can earn credits by redeeming exclusive codes. Credits can be used to pay for your orders!</div></div>
+        <div class="faq-item-apple"><div class="faq-question-apple" onclick="toggleFAQ(this)"><span>How do I earn credits?</span><i class="fas fa-chevron-down"></i></div><div class="faq-answer-apple">You can earn credits by redeeming exclusive codes or recharging via GCash.</div></div>
       </div>
     </div>
     <div class="contact-form-apple"><h2>Send us a Message</h2><form id="contactForm"><input type="text" placeholder="Your Name" required><input type="email" placeholder="Your Email" required><textarea placeholder="Your Message" rows="4" required></textarea><button type="submit" class="btn-primary-apple">Send Message</button></form></div>
@@ -443,6 +456,64 @@
   <div id="cartItemsList" class="cart-items-list"><div class="empty-cart-msg">Your cart is empty.<br>Add something delicious ✨</div></div>
   <div class="cart-footer"><div class="total-row"><span>Total</span><span id="cartTotalPrice">₱0.00</span></div><button class="checkout-btn" id="checkoutBtn">Checkout →</button></div>
 </div>
+
+<!-- GCash QR Payment Modal -->
+<div id="gcashQRModal" class="modal" style="display: none;">
+  <div class="modal-content qr-modal">
+    <div class="modal-header">
+      <h2><i class="fas fa-qrcode"></i> GCash Payment</h2>
+      <button class="close-modal" onclick="closeGCashQRModal()">&times;</button>
+    </div>
+    <div class="qr-content">
+      <div class="qr-amount">
+        <h3>Amount to Pay:</h3>
+        <div class="amount" id="qrPaymentAmount">₱0</div>
+      </div>
+      
+      <div class="qr-code-container">
+        <div class="qr-loading" id="qrLoading">
+          <i class="fas fa-spinner fa-spin"></i> Generating QR Code...
+        </div>
+        <img id="qrCodeImage" style="display: none;" alt="GCash QR Code">
+      </div>
+      
+      <div class="gcash-details">
+        <p><i class="fas fa-phone"></i> GCash Number: <strong id="gcashNumber">09633863860</strong></p>
+        <p><i class="fas fa-user"></i> Account Name: <strong id="gcashName">Jessrell M. Custodio</strong></p>
+      </div>
+      
+      <div class="payment-instructions">
+        <h4>How to pay:</h4>
+        <ol>
+          <li>Open GCash app on your phone</li>
+          <li>Click <strong>"Pay QR"</strong> or <strong>"Send Money"</strong></li>
+          <li>Scan the QR code above or send to <strong id="instructionNumber">09633863860</strong></li>
+          <li>Enter the exact amount: <strong id="instructionAmount">₱0</strong></li>
+          <li>Enter your GCash MPIN to confirm</li>
+          <li>After payment, the system will automatically verify within 30-60 seconds</li>
+        </ol>
+      </div>
+      
+      <div class="payment-status" id="paymentStatus" style="display: none;">
+        <div class="status-icon">
+          <i class="fas fa-spinner fa-spin"></i>
+        </div>
+        <div class="status-text">Waiting for payment confirmation...</div>
+        <div class="status-timer" id="paymentTimer">Time remaining: 5:00</div>
+      </div>
+      
+      <div class="payment-note">
+        <i class="fas fa-info-circle"></i>
+        <p>⚠️ Please do not close this window. Payment will be verified automatically.</p>
+      </div>
+      
+      <div class="cancel-payment">
+        <button class="btn-secondary-apple" onclick="cancelPayment()">Cancel Payment</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="toastMsg" class="toast-msg">Item added to cart</div>
 
 <script src="js/account.js"></script>

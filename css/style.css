@@ -2463,3 +2463,69 @@ body.admin-mode .recharge-icon {
     font-size: 2rem;
   }
 }
+
+/* Payment Status Styles */
+.payment-status {
+  background: #f8f9fa;
+  border-radius: 16px;
+  padding: 20px;
+  margin: 20px 0;
+  text-align: center;
+  border: 1px solid #e9e9ef;
+}
+
+.status-icon {
+  font-size: 2.5rem;
+  margin-bottom: 10px;
+}
+
+.status-icon i {
+  color: #e63946;
+}
+
+.status-text {
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.status-timer {
+  font-size: 0.85rem;
+  color: #86868b;
+  font-family: monospace;
+  font-weight: 600;
+}
+
+.payment-status.success {
+  background: #e8f5e9;
+  border-color: #4caf50;
+}
+
+.payment-status.success .status-icon i {
+  color: #4caf50;
+}
+
+.payment-status.failed {
+  background: #ffebee;
+  border-color: #f44336;
+}
+
+.payment-status.failed .status-icon i {
+  color: #f44336;
+}
+
+.cancel-payment {
+  margin-top: 15px;
+  text-align: center;
+}
+
+.cancel-payment button {
+  background: transparent;
+  color: #86868b;
+  border: 1px solid #e9e9ef;
+}
+
+.cancel-payment button:hover {
+  background: #ff5e6e;
+  color: white;
+  border-color: #ff5e6e;
+}
