@@ -21,9 +21,13 @@
         <a href="#" data-page="shop" class="nav-link">Shop</a>
         <a href="#" data-page="featured" class="nav-link">Featured</a>
         <a href="#" data-page="orders" class="nav-link">Orders</a>
+        <a href="#" data-page="admin" class="nav-link">Admin</a>
         <a href="#" data-page="help" class="nav-link">Help</a>
       </div>
       <div class="nav-actions">
+        <div class="admin-icon" id="adminIcon">
+          <i class="fas fa-code"></i>
+        </div>
         <div class="account-icon" id="accountIcon">
           <i class="fas fa-user-circle"></i>
           <span class="user-name" id="userNameDisplay"></span>
@@ -181,6 +185,77 @@
         <i class="fas fa-receipt" style="font-size: 4rem; color: #e63946; margin-bottom: 20px;"></i>
         <p>No orders yet. Start shopping!</p>
         <button class="btn-primary-apple" onclick="switchPage('shop')" style="margin-top: 20px;">Shop Now</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMIN PAGE -->
+  <div id="adminPage" class="page">
+    <div class="page-hero">
+      <h1><i class="fas fa-code"></i> Admin Dashboard</h1>
+      <p>Manage orders, view logs, and monitor system activity</p>
+    </div>
+    
+    <div class="admin-tabs">
+      <button class="admin-tab-btn active" onclick="switchAdminTab('orders')">📦 Orders Management</button>
+      <button class="admin-tab-btn" onclick="switchAdminTab('logs')">📋 Login Logs</button>
+      <button class="admin-tab-btn" onclick="switchAdminTab('users')">👥 User Management</button>
+      <button class="admin-tab-btn" onclick="switchAdminTab('redemptions')">🎫 Code Redemptions</button>
+    </div>
+    
+    <!-- Orders Management Tab -->
+    <div id="adminOrdersTab" class="admin-tab active">
+      <div class="admin-actions">
+        <button class="btn-secondary-apple" onclick="refreshAdminOrders()">
+          <i class="fas fa-sync-alt"></i> Refresh Orders
+        </button>
+      </div>
+      <div id="adminOrdersContainer" class="admin-orders-container">
+        <div style="text-align: center; padding: 40px;">
+          <i class="fas fa-spinner fa-spin"></i> Loading orders...
+        </div>
+      </div>
+    </div>
+    
+    <!-- Login Logs Tab -->
+    <div id="adminLogsTab" class="admin-tab">
+      <div class="admin-actions">
+        <button class="btn-secondary-apple" onclick="refreshAdminLogs()">
+          <i class="fas fa-sync-alt"></i> Refresh Logs
+        </button>
+      </div>
+      <div id="adminLogsContainer" class="admin-logs-container">
+        <div style="text-align: center; padding: 40px;">
+          <i class="fas fa-spinner fa-spin"></i> Loading logs...
+        </div>
+      </div>
+    </div>
+    
+    <!-- User Management Tab -->
+    <div id="adminUsersTab" class="admin-tab">
+      <div class="admin-actions">
+        <button class="btn-secondary-apple" onclick="refreshAdminUsers()">
+          <i class="fas fa-sync-alt"></i> Refresh Users
+        </button>
+      </div>
+      <div id="adminUsersContainer" class="admin-users-container">
+        <div style="text-align: center; padding: 40px;">
+          <i class="fas fa-spinner fa-spin"></i> Loading users...
+        </div>
+      </div>
+    </div>
+    
+    <!-- Code Redemptions Tab -->
+    <div id="adminRedemptionsTab" class="admin-tab">
+      <div class="admin-actions">
+        <button class="btn-secondary-apple" onclick="refreshAdminRedemptions()">
+          <i class="fas fa-sync-alt"></i> Refresh Redemptions
+        </button>
+      </div>
+      <div id="adminRedemptionsContainer" class="admin-redemptions-container">
+        <div style="text-align: center; padding: 40px;">
+          <i class="fas fa-spinner fa-spin"></i> Loading redemptions...
+        </div>
       </div>
     </div>
   </div>
