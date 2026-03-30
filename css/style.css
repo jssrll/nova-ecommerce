@@ -2529,3 +2529,45 @@ body.admin-mode .recharge-icon {
   color: white;
   border-color: #ff5e6e;
 }
+
+/* Manual GCash Payment Entry */
+.manual-entry {
+  margin: 20px 0;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 16px;
+  border: 1px solid #e9e9ef;
+}
+
+.manual-payment {
+  text-align: center;
+}
+
+.gcash-manual-details {
+  background: white;
+  padding: 15px;
+  border-radius: 12px;
+  margin: 15px 0;
+  text-align: left;
+}
+
+.gcash-manual-details p {
+  margin: 10px 0;
+  font-size: 1rem;
+}
+
+.copy-number-btn {
+  background: #1d1d1f;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 980px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: 0.2s;
+  width: 100%;
+}
+
+.copy-number-btn:hover {
+  background: #e63946;
+}

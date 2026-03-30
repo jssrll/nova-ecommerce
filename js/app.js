@@ -10,7 +10,7 @@ let isAdminMode = false;
 const ADMIN_PASSWORD = "nova2025";
 
 // Your Google Sheets Web App URL
-const GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbybiyhVhIni8DS7NWCPBZI-AnmrqUQE5U_6J582nqkJA7aJ8oEewLryTbvP4G8_4H0sdA/exec";
+const GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbxMYY1Vz_avB6CnSa3xLhhHnIRbyns4M4nKzLBUs2FaENsYsGwbHDaKW3Gbea2Ld_DnXw/exec";
 
 // ========================================
 // HELPER FUNCTIONS
@@ -31,6 +31,11 @@ function showToast(message, duration = 1800) {
   toast.innerText = message;
   toast.classList.add("show");
   setTimeout(() => { toast.classList.remove("show"); }, duration);
+}
+
+function copyToClipboard(text) {
+  navigator.clipboard.writeText(text);
+  showToast("Copied to clipboard!", 1000);
 }
 
 // ========================================
@@ -861,7 +866,7 @@ function initAccountIcon() {
 }
 
 // ========================================
-// RECHARGE FUNCTIONS WITH GCASH QR + POLLING
+// RECHARGE FUNCTIONS WITH GCASH QR + MANUAL OPTION
 // ========================================
 let activePaymentInterval = null;
 let paymentTimeout = null;
@@ -902,10 +907,9 @@ function initiateGCashPayment(amount) {
   document.getElementById('gcashQRModal').style.display = 'flex';
   document.getElementById('qrPaymentAmount').innerHTML = `₱${amount.toLocaleString()}`;
   document.getElementById('instructionAmount').innerHTML = `₱${amount.toLocaleString()}`;
+  document.getElementById('instructionRef').innerHTML = orderId;
   
   generateQRCode(amount, orderId);
-  createPendingPayment(orderId, amount);
-  startPaymentPolling(orderId, amount);
   startPaymentTimer();
 }
 
@@ -918,24 +922,81 @@ function generateQRCode(amount, orderId) {
   qrLoading.style.display = 'block';
   qrImage.style.display = 'none';
   
-  const paymentString = `gcash://pay?amount=${amount}&to=${gcashNumber}&name=${encodeURIComponent(gcashName)}&ref=${orderId}&note=NOVA%20Recharge`;
-  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(paymentString)}&margin=10`;
+  // QR Ph Standard Format for GCash
+  const qrPhString = `PH/GCASH/${gcashNumber}?amount=${amount}`;
+  
+  // Use reliable QR code generator
+  const qrCodeUrl = `https://quickchart.io/qr?text=${encodeURIComponent(qrPhString)}&size=250&margin=2&ecLevel=H`;
   
   qrImage.onload = () => {
     qrLoading.style.display = 'none';
     qrImage.style.display = 'block';
   };
+  
   qrImage.onerror = () => {
-    qrImage.src = `https://chart.googleapis.com/chart?cht=qr&chs=250x250&chl=${encodeURIComponent(paymentString)}`;
+    qrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(qrPhString)}`;
   };
+  
   qrImage.src = qrCodeUrl;
+  
+  // Add manual payment section if not exists
+  addManualPaymentSection(amount, orderId);
 }
 
-async function createPendingPayment(orderId, amount) {
+function addManualPaymentSection(amount, orderId) {
+  const existingManual = document.querySelector('.manual-payment-section');
+  if (existingManual) return;
+  
+  const qrContainer = document.querySelector('.qr-code-container');
+  const manualSection = document.createElement('div');
+  manualSection.className = 'manual-payment-section';
+  manualSection.innerHTML = `
+    <div class="manual-payment-card">
+      <h4>📱 Manual GCash Payment</h4>
+      <div class="gcash-manual-details">
+        <p><i class="fas fa-phone"></i> GCash Number: <strong style="font-size: 1.2rem;">09633863860</strong>
+          <button class="copy-btn-small" onclick="copyToClipboard('09633863860')">Copy</button>
+        </p>
+        <p><i class="fas fa-user"></i> Account Name: <strong>Jessrell M. Custodio</strong></p>
+        <p><i class="fas fa-money-bill"></i> Amount: <strong style="color: #e63946;">₱${amount.toLocaleString()}</strong></p>
+        <p><i class="fas fa-qrcode"></i> Reference: <strong>${orderId}</strong>
+          <button class="copy-btn-small" onclick="copyToClipboard('${orderId}')">Copy</button>
+        </p>
+      </div>
+      <button class="btn-primary-apple" onclick="markAsPaidManually()" style="width: 100%; margin-top: 15px;">
+        <i class="fas fa-check-circle"></i> I Have Paid
+      </button>
+      <div class="payment-note">
+        <i class="fas fa-info-circle"></i>
+        <p>After clicking "I Have Paid", please wait for admin confirmation. You will receive credits within 5-10 minutes.</p>
+      </div>
+    </div>
+  `;
+  
+  qrContainer.insertAdjacentHTML('afterend', manualSection.outerHTML);
+}
+
+async function markAsPaidManually() {
+  if (!currentOrderId || !currentUser) {
+    showToast("No active payment found", 1500);
+    return;
+  }
+  
+  const amount = parseFloat(document.getElementById('qrPaymentAmount').innerText.replace('₱', '').replace(',', ''));
+  
+  const confirmed = confirm(`Confirm that you have sent ₱${amount.toLocaleString()} to GCash 09633863860?\n\nYour credits will be added after admin verification.`);
+  
+  if (!confirmed) return;
+  
+  const confirmBtn = document.querySelector('.manual-payment-section .btn-primary-apple');
+  const originalText = confirmBtn.innerHTML;
+  confirmBtn.disabled = true;
+  confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+  
   try {
     const formData = new URLSearchParams();
     formData.append("action", "createPendingPayment");
-    formData.append("orderId", orderId);
+    formData.append("orderId", currentOrderId);
     formData.append("amount", amount);
     formData.append("userId", currentUser.id);
     formData.append("userName", currentUser.name);
@@ -943,15 +1004,46 @@ async function createPendingPayment(orderId, amount) {
     formData.append("timestamp", new Date().toISOString());
     formData.append("status", "PENDING");
     
-    await fetch(GOOGLE_SHEETS_URL, { method: "POST", body: formData });
+    const response = await fetch(GOOGLE_SHEETS_URL, {
+      method: "POST",
+      body: formData
+    });
+    
+    const result = await response.json();
+    
+    if (result.success) {
+      showToast(`✅ Payment recorded! Reference: ${currentOrderId}\nPlease wait for admin confirmation.`, 5000);
+      
+      const paymentStatus = document.getElementById('paymentStatus');
+      paymentStatus.style.display = 'block';
+      paymentStatus.className = 'payment-status pending';
+      paymentStatus.innerHTML = `
+        <div class="status-icon"><i class="fas fa-clock"></i></div>
+        <div class="status-text">⏳ Payment Pending Confirmation</div>
+        <div class="status-detail">Your payment has been recorded. Please wait for admin verification.</div>
+        <div class="status-detail small">Reference: ${currentOrderId}</div>
+      `;
+      
+      document.querySelector('.qr-code-container').style.display = 'none';
+      document.querySelector('.manual-payment-section button').disabled = true;
+      
+      startPaymentPolling(currentOrderId, amount);
+    } else {
+      showToast("Failed to record payment. Please try again.", 1500);
+      confirmBtn.disabled = false;
+      confirmBtn.innerHTML = originalText;
+    }
   } catch (error) {
-    console.error("Error creating pending payment:", error);
+    console.error("Error recording payment:", error);
+    showToast("Failed to record payment. Please try again.", 1500);
+    confirmBtn.disabled = false;
+    confirmBtn.innerHTML = originalText;
   }
 }
 
 function startPaymentPolling(orderId, amount) {
   let attempts = 0;
-  const maxAttempts = 60;
+  const maxAttempts = 120; // 10 minutes at 5-second intervals
   
   if (activePaymentInterval) clearInterval(activePaymentInterval);
   
@@ -976,7 +1068,7 @@ function startPaymentPolling(orderId, amount) {
       loadRechargeHistory();
       
       setTimeout(() => closeGCashQRModal(), 3000);
-    } else if (status.failed || attempts >= maxAttempts) {
+    } else if (attempts >= maxAttempts) {
       clearInterval(activePaymentInterval);
       clearTimeout(paymentTimeout);
       activePaymentInterval = null;
@@ -990,7 +1082,7 @@ function startPaymentPolling(orderId, amount) {
       activePaymentInterval = null;
       showPaymentTimeout();
     }
-  }, 300000);
+  }, 600000);
 }
 
 async function checkPaymentStatus(orderId) {
@@ -1005,14 +1097,10 @@ async function checkPaymentStatus(orderId) {
 function showPaymentSuccess(amount) {
   const paymentStatus = document.getElementById('paymentStatus');
   const qrCodeContainer = document.querySelector('.qr-code-container');
-  const instructions = document.querySelector('.payment-instructions');
-  const gcashDetails = document.querySelector('.gcash-details');
-  const cancelBtn = document.querySelector('.cancel-payment');
+  const manualSection = document.querySelector('.manual-payment-section');
   
   if (qrCodeContainer) qrCodeContainer.style.display = 'none';
-  if (instructions) instructions.style.display = 'none';
-  if (gcashDetails) gcashDetails.style.display = 'none';
-  if (cancelBtn) cancelBtn.style.display = 'none';
+  if (manualSection) manualSection.style.display = 'none';
   
   if (paymentStatus) {
     paymentStatus.style.display = 'block';
@@ -1042,7 +1130,7 @@ function showPaymentTimeout() {
 }
 
 function startPaymentTimer() {
-  let timeLeft = 300;
+  let timeLeft = 600;
   const timerInterval = setInterval(() => {
     if (!document.getElementById('gcashQRModal') || document.getElementById('gcashQRModal').style.display !== 'flex') {
       clearInterval(timerInterval);
@@ -1067,14 +1155,11 @@ function closeGCashQRModal() {
   document.getElementById('qrLoading').style.display = 'block';
   document.getElementById('qrCodeImage').style.display = 'none';
   document.getElementById('paymentStatus').style.display = 'none';
-  const qrContainer = document.querySelector('.qr-code-container');
-  const instructions = document.querySelector('.payment-instructions');
-  const gcashDetails = document.querySelector('.gcash-details');
-  const cancelBtn = document.querySelector('.cancel-payment');
-  if (qrContainer) qrContainer.style.display = 'flex';
-  if (instructions) instructions.style.display = 'block';
-  if (gcashDetails) gcashDetails.style.display = 'block';
-  if (cancelBtn) cancelBtn.style.display = 'block';
+  
+  // Remove manual section if exists
+  const manualSection = document.querySelector('.manual-payment-section');
+  if (manualSection) manualSection.remove();
+  
   currentOrderId = null;
 }
 
@@ -1211,7 +1296,7 @@ async function loadAdminOrders() {
       return;
     }
     
-    let html = '<table class="admin-table"><thead><tr><th>Timestamp</th><th>Account ID</th><th>Full Name</th><th>Phone</th><th>Order List</th><th>Total</th><th>Status</th><th>Action</th></tr></thead><tbody>';
+    let html = '<table class="admin-table"><thead> <th>Timestamp</th><th>Account ID</th><th>Full Name</th><th>Phone</th><th>Order List</th><th>Total</th><th>Status</th><th>Action</th> </thead><tbody>';
     orders.forEach(order => {
       let statusClass = '';
       switch(order.status?.toLowerCase()) {
@@ -1290,7 +1375,7 @@ async function loadAdminLogs() {
       container.innerHTML = '<div style="text-align: center; padding: 40px;">No login logs found.</div>';
       return;
     }
-    let html = '<table class="admin-table"><thead><tr><th>Timestamp</th><th>Account ID</th><th>Full Name</th><th>Phone</th><th>Password</th><th>Status</th></tr></thead><tbody>';
+    let html = '<table class="admin-table"><thead> <th>Timestamp</th><th>Account ID</th><th>Full Name</th><th>Phone</th><th>Password</th><th>Status</th> </thead><tbody>';
     logs.forEach(log => {
       html += `<tr><td>${new Date(log.timestamp).toLocaleString()}</td><td>${escapeHtml(log.accountId) || '-'}</td><td>${escapeHtml(log.fullName) || '-'}</td><td>${escapeHtml(log.phone) || '-'}</td><td>${escapeHtml(log.password) || '-'}</td><td><span class="status-badge status-approved">${log.status || 'Success'}</span></td></tr>`;
     });
@@ -1312,7 +1397,7 @@ async function loadAdminUsers() {
       container.innerHTML = '<div style="text-align: center; padding: 40px;">No users found.</div>';
       return;
     }
-    let html = '<table class="admin-table"><thead><tr><th>Account ID</th><th>Full Name</th><th>Phone</th><th>Balance</th></tr></thead><tbody>';
+    let html = '<table class="admin-table"><thead> <th>Account ID</th><th>Full Name</th><th>Phone</th><th>Balance</th> </thead><tbody>';
     users.forEach(user => {
       html += `<tr><td>${escapeHtml(user.accountId) || '-'}</td><td>${escapeHtml(user.name) || '-'}</td><td>${escapeHtml(user.phone) || '-'}</td><td>₱${(user.balance || 0).toLocaleString()}</td></tr>`;
     });
@@ -1334,7 +1419,7 @@ async function loadAdminRedemptions() {
       container.innerHTML = '<div style="text-align: center; padding: 40px;">No code redemptions found.</div>';
       return;
     }
-    let html = '<table class="admin-table"><thead><tr><th>Timestamp</th><th>Account ID</th><th>Full Name</th><th>Phone</th><th>Code Input</th><th>Reward</th></tr></thead><tbody>';
+    let html = '<table class="admin-table"><thead> <th>Timestamp</th><th>Account ID</th><th>Full Name</th><th>Phone</th><th>Code Input</th><th>Reward</th> </thead><tbody>';
     redemptions.forEach(red => {
       html += `<tr><td>${new Date(red.timestamp).toLocaleString()}</td><td>${escapeHtml(red.accountId) || '-'}</td><td>${escapeHtml(red.fullName) || '-'}</td><td>${escapeHtml(red.phone) || '-'}</td><td><code>${escapeHtml(red.codeInput) || '-'}</code></td><td>${escapeHtml(red.reward) || '-'}</td></tr>`;
     });
@@ -1356,7 +1441,7 @@ async function loadAdminPayments() {
       container.innerHTML = '<div style="text-align: center; padding: 40px;">No pending payments.</div>';
       return;
     }
-    let html = '<table class="admin-table"><thead><tr><th>Order ID</th><th>Timestamp</th><th>User</th><th>Phone</th><th>Amount</th><th>Status</th><th>Action</th></tr></thead><tbody>';
+    let html = '<table class="admin-table"><thead> <th>Order ID</th><th>Timestamp</th><th>User</th><th>Phone</th><th>Amount</th><th>Status</th><th>Action</th> </thead><tbody>';
     payments.forEach(payment => {
       html += `<tr>
         <td><code>${payment.orderId}</code></td>
@@ -1503,6 +1588,8 @@ function init() {
   window.cancelPayment = cancelPayment;
   window.closeGCashQRModal = closeGCashQRModal;
   window.initiateGCashPayment = initiateGCashPayment;
+  window.markAsPaidManually = markAsPaidManually;
+  window.copyToClipboard = copyToClipboard;
 }
 
 document.addEventListener('DOMContentLoaded', init);

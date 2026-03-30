@@ -482,35 +482,28 @@
         <p><i class="fas fa-user"></i> Account Name: <strong id="gcashName">Jessrell M. Custodio</strong></p>
       </div>
       
-      <div class="payment-instructions">
-        <h4>How to pay:</h4>
-        <ol>
-          <li>Open GCash app on your phone</li>
-          <li>Click <strong>"Pay QR"</strong> or <strong>"Send Money"</strong></li>
-          <li>Scan the QR code above or send to <strong id="instructionNumber">09633863860</strong></li>
-          <li>Enter the exact amount: <strong id="instructionAmount">₱0</strong></li>
-          <li>Enter your GCash MPIN to confirm</li>
-          <li>After payment, the system will automatically verify within 30-60 seconds</li>
-        </ol>
-      </div>
-      
-      <div class="payment-status" id="paymentStatus" style="display: none;">
-        <div class="status-icon">
-          <i class="fas fa-spinner fa-spin"></i>
-        </div>
-        <div class="status-text">Waiting for payment confirmation...</div>
-        <div class="status-timer" id="paymentTimer">Time remaining: 5:00</div>
-      </div>
-      
-      <div class="payment-note">
-        <i class="fas fa-info-circle"></i>
-        <p>⚠️ Please do not close this window. Payment will be verified automatically.</p>
-      </div>
-      
-      <div class="cancel-payment">
-        <button class="btn-secondary-apple" onclick="cancelPayment()">Cancel Payment</button>
-      </div>
-    </div>
+<div class="payment-instructions">
+  <h4>How to pay via GCash:</h4>
+  <ol>
+    <li><strong>Option 1: Scan QR Code</strong> - Open GCash → Tap "Pay QR" → Scan the code above</li>
+    <li><strong>Option 2: Send Money Manually</strong> - Open GCash → Tap "Send Money" → Enter number: <strong id="instructionNumber">09633863860</strong></li>
+    <li>Enter the exact amount: <strong id="instructionAmount">₱0</strong></li>
+    <li>Add reference: <strong id="instructionRef">NOVA_[YourName]</strong></li>
+    <li>Enter your MPIN to confirm payment</li>
+    <li>After payment, click "I Have Paid" below</li>
+  </ol>
+</div>
+
+<!-- Add this after the QR code section -->
+<div class="manual-payment-section">
+  <button class="btn-primary-apple" onclick="markAsPaidManually()" style="width: 100%; margin-top: 15px;">
+    <i class="fas fa-check-circle"></i> I Have Paid
+  </button>
+  <div class="payment-note">
+    <i class="fas fa-info-circle"></i>
+    <p>After clicking "I Have Paid", please wait for admin confirmation. You will receive credits within 5-10 minutes.</p>
+  </div>
+</div>
   </div>
 </div>
 
