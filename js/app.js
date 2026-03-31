@@ -10,7 +10,7 @@ let isAdminMode = false;
 const ADMIN_PASSWORD = "jssrll101007";
 
 // Your Google Sheets Web App URL
-const GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbzIroCJbvfknrM8VsNXWTfO1uPcsuPD1lanAdJ4Xk5RO8kCly7Y68A7vxBQpp2CxBJX/exec";
+const GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbyRdVs9XD5CIbz-k-4PM9lbb24AVbf-zSgAWKoWWmEHBjBirvwGxX03Z0irjwd2BbFXnA/exec";
 
 // ========================================
 // HELPER FUNCTIONS
