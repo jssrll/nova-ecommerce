@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>NOVA</title>
+  <title>JLF | Fireworks & Pyrotechnics</title>
   <!-- Google Fonts + Font Awesome -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -11,27 +11,18 @@
   <link rel="stylesheet" href="css/style.css">
   <!-- PWA Manifest -->
   <link rel="manifest" href="/manifest.json">
-  <meta name="theme-color" content="#e63946">
-  <!-- iOS / Apple Touch Icon -->
-  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-  <!-- Favicon for browsers -->
-  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-  <link rel="shortcut icon" href="/favicon.ico">
-  <!-- Android Chrome -->
-  <link rel="icon" type="image/png" sizes="192x192" href="/android-chrome-192x192.png">
-  <link rel="icon" type="image/png" sizes="512x512" href="/android-chrome-512x512.png">
+  <meta name="theme-color" content="#ff6a3d">
   <!-- PWA Settings -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="NOVA">
+  <meta name="apple-mobile-web-app-title" content="JLF Fireworks">
 </head>
 <body>
 
 <div class="header">
   <div class="container">
     <div class="nav">
-      <div class="logo">NOVA<span>.</span></div>
+      <div class="logo">JLF<span>🎆</span></div>
       <div class="nav-links" id="navLinks">
         <a href="#" data-page="home" class="nav-link active">Home</a>
         <a href="#" data-page="shop" class="nav-link">Shop</a>
@@ -64,47 +55,51 @@
 </div>
 
 <main class="container">
-  <!-- HOME PAGE -->
+  <!-- HOME PAGE - Fireworks Theme -->
   <div id="homePage" class="page active">
-    <div class="hero-apple">
+    <div class="hero-fireworks">
       <div class="hero-content">
-        <h1 class="hero-title">NOVA.</h1>
-        <p class="hero-subtitle">Your affordable destination for enjoyable lifestyle, exclusive rewards, and delicious street food.</p>
+        <h1 class="hero-title">JLF<span>🎆</span></h1>
+        <p class="hero-subtitle">Light up the sky with our premium fireworks and pyrotechnics! Safe, spectacular, and unforgettable celebrations.</p>
+        <div class="hero-buttons">
+          <button class="btn-primary-large" onclick="switchPage('shop')">Shop Now</button>
+          <button class="btn-primary-large" onclick="openAccountModal()" style="background: transparent; border: 1px solid white;">Sign In / Register</button>
+        </div>
       </div>
     </div>
 
     <div class="featured-showcase">
       <div class="showcase-header">
-        <h2>Featured Delights</h2>
-        <p>Our most loved Filipino street food favorites</p>
+        <h2>✨ Best Sellers ✨</h2>
+        <p>Our most popular fireworks for every celebration</p>
       </div>
       <div class="showcase-grid">
         <div class="showcase-item">
-          <div class="showcase-icon">🍳</div>
-          <h3>Kwek Kwek</h3>
-          <p>Battered quail eggs</p>
-          <span class="price">₱5</span>
+          <div class="showcase-icon">🎇</div>
+          <h3>Roman Candles</h3>
+          <p>Multi-shot aerial effects</p>
+          <span class="price">₱150</span>
           <button class="btn-small-primary" onclick="addToCart(1)">Add to Cart</button>
         </div>
         <div class="showcase-item">
-          <div class="showcase-icon">🍔</div>
-          <h3>Classic Burger</h3>
-          <p>Juicy beef patty</p>
-          <span class="price">₱35</span>
+          <div class="showcase-icon">🧨</div>
+          <h3>Firecrackers</h3>
+          <p>Classic celebration crackers</p>
+          <span class="price">₱50</span>
           <button class="btn-small-primary" onclick="addToCart(5)">Add to Cart</button>
         </div>
         <div class="showcase-item">
-          <div class="showcase-icon">🍧</div>
-          <h3>Halo-Halo</h3>
-          <p>Shaved ice dessert</p>
-          <span class="price">₱50</span>
-          <button class="btn-small-primary" onclick="addToCart(10)">Add to Cart</button>
+          <div class="showcase-icon">🚀</div>
+          <h3>Sky Rockets</h3>
+          <p>High-flying aerial bursts</p>
+          <span class="price">₱200</span>
+          <button class="btn-small-primary" onclick="addToCart(2)">Add to Cart</button>
         </div>
         <div class="showcase-item">
-          <div class="showcase-icon">🥤</div>
-          <h3>Milk Shake</h3>
-          <p>Creamy and thick</p>
-          <span class="price">₱40</span>
+          <div class="showcase-icon">✨</div>
+          <h3>Sparklers Pack</h3>
+          <p>Safe and magical hand-held</p>
+          <span class="price">₱30</span>
           <button class="btn-small-primary" onclick="addToCart(9)">Add to Cart</button>
         </div>
       </div>
@@ -112,21 +107,27 @@
 
     <div class="features-apple">
       <div class="feature-block">
-        <div class="feature-icon"><i class="fas fa-shopping-bag"></i></div>
-        <h3>Shop</h3>
-        <p>Affordable products and carefully selected for quality.</p>
+        <div class="feature-icon"><i class="fas fa-truck"></i></div>
+        <h3>Fast Delivery</h3>
+        <p>Same-day delivery within Metro Manila</p>
         <a href="#" onclick="switchPage('shop')">Learn more <i class="fas fa-chevron-right"></i></a>
+      </div>
+      <div class="feature-block">
+        <div class="feature-icon"><i class="fas fa-shield-alt"></i></div>
+        <h3>Safety First</h3>
+        <p>All products are DTI-certified and safe</p>
+        <a href="#" onclick="switchPage('featured')">Learn more <i class="fas fa-chevron-right"></i></a>
       </div>
       <div class="feature-block">
         <div class="feature-icon"><i class="fas fa-gift"></i></div>
         <h3>Exclusive Codes</h3>
-        <p>Redeem special codes for instant peso credits.</p>
+        <p>Redeem special codes for instant credits</p>
         <a href="#" onclick="switchPage('featured')">Learn more <i class="fas fa-chevron-right"></i></a>
       </div>
       <div class="feature-block">
         <div class="feature-icon"><i class="fas fa-headset"></i></div>
         <h3>24/7 Support</h3>
-        <p>Dedicated customer service to help you every step of the way.</p>
+        <p>We're here to help with your celebrations</p>
         <a href="#" onclick="switchPage('help')">Learn more <i class="fas fa-chevron-right"></i></a>
       </div>
     </div>
@@ -136,46 +137,49 @@
       <div class="steps">
         <div class="step"><div class="step-number">1</div><i class="fas fa-user-plus"></i><h3>Create Account</h3><p>Sign up in seconds</p></div>
         <div class="step-arrow"><i class="fas fa-arrow-right"></i></div>
-        <div class="step"><div class="step-number">2</div><i class="fas fa-shopping-cart"></i><h3>Shop</h3><p>Choose from our collection</p></div>
+        <div class="step"><div class="step-number">2</div><i class="fas fa-shopping-cart"></i><h3>Shop Fireworks</h3><p>Choose your favorites</p></div>
         <div class="step-arrow"><i class="fas fa-arrow-right"></i></div>
         <div class="step"><div class="step-number">3</div><i class="fas fa-ticket-alt"></i><h3>Redeem Codes</h3><p>Get instant credits</p></div>
+        <div class="step-arrow"><i class="fas fa-arrow-right"></i></div>
+        <div class="step"><div class="step-number">4</div><i class="fas fa-fire"></i><h3>Light Up!</h3><p>Enjoy your celebration</p></div>
       </div>
     </div>
 
     <div class="stats-section">
-      <div class="stat"><div class="stat-number">99+</div><div class="stat-label">Happy Customers</div></div>
-      <div class="stat"><div class="stat-number">30+</div><div class="stat-label">Daily Orders</div></div>
+      <div class="stat"><div class="stat-number">5K+</div><div class="stat-label">Happy Celebrations</div></div>
+      <div class="stat"><div class="stat-number">200+</div><div class="stat-label">Products Available</div></div>
       <div class="stat"><div class="stat-number">24/7</div><div class="stat-label">Support Available</div></div>
     </div>
 
     <div class="testimonials-apple">
       <h2>What Our Customers Say</h2>
       <div class="testimonials-grid">
-        <div class="testimonial-card"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><p>"Amazing products! I've saved so much money with the code redemption system."</p><h4>- Sarah J.</h4></div>
-        <div class="testimonial-card"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><p>"Love the exclusive codes. The street food tastes just like home!"</p><h4>- Michael T.</h4></div>
-        <div class="testimonial-card"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i><p>"Best e-commerce experience. Customer support is outstanding."</p><h4>- Emma L.</h4></div>
+        <div class="testimonial-card"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><p>"Best fireworks shop! Made our New Year celebration unforgettable!"</p><h4>- Mark R.</h4></div>
+        <div class="testimonial-card"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><p>"Safe and high-quality products. Will definitely order again!"</p><h4>- Christine L.</h4></div>
+        <div class="testimonial-card"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i><p>"Fast delivery and great customer service. Highly recommended!"</p><h4>- Jun M.</h4></div>
       </div>
     </div>
   </div>
 
-  <!-- SHOP PAGE -->
+  <!-- SHOP PAGE - Fireworks Products -->
   <div id="shopPage" class="page">
-    <div class="page-hero"><h1>Shop Collection</h1><p>Discover our delicious selection of Filipino street foods and snacks.</p></div>
+    <div class="page-hero"><h1>🎆 Fireworks Collection 🎇</h1><p>Choose from our wide selection of premium pyrotechnics for every celebration</p></div>
     <div class="filters-bar-apple">
-      <div class="search-box-apple"><i class="fas fa-search"></i><input type="text" id="searchInput" placeholder="Search products..."></div>
+      <div class="search-box-apple"><i class="fas fa-search"></i><input type="text" id="searchInput" placeholder="Search fireworks..."></div>
       <div class="category-filter-apple" id="categoryFilter">
         <button class="cat-btn-apple active" data-cat="all">All</button>
-        <button class="cat-btn-apple" data-cat="Street Snacks">Street Snacks</button>
-        <button class="cat-btn-apple" data-cat="Heavy Snack">Heavy Snack</button>
-        <button class="cat-btn-apple" data-cat="Drinks & Desserts">Drinks & Desserts</button>
+        <button class="cat-btn-apple" data-cat="Aerial">Aerial</button>
+        <button class="cat-btn-apple" data-cat="Ground">Ground</button>
+        <button class="cat-btn-apple" data-cat="Sparklers">Sparklers</button>
+        <button class="cat-btn-apple" data-cat="Fountains">Fountains</button>
       </div>
     </div>
     <div id="productsContainer" class="products-grid-apple"></div>
   </div>
 
-  <!-- FEATURED PAGE (Code Redemption Only) -->
+  <!-- FEATURED PAGE -->
   <div id="featuredPage" class="page">
-    <div class="page-hero"><h1>Rewards & Redemption</h1><p>Redeem your exclusive codes for amazing rewards.</p></div>
+    <div class="page-hero"><h1>🎫 Rewards & Redemption 🎁</h1><p>Redeem your exclusive codes for amazing rewards and credits</p></div>
     <div class="redemption-section-apple">
       <div class="code-card-apple">
         <h2><i class="fas fa-ticket-alt"></i> Code Redemption</h2>
@@ -183,20 +187,19 @@
         <div id="codeMessage" class="code-message"></div>
       </div>
     </div>
-    <div class="featured-products-apple"><h2>Featured Items</h2><div class="featured-grid-apple" id="featuredGrid"></div></div>
+    <div class="featured-products-apple"><h2>🔥 Featured Items 🔥</h2><div class="featured-grid-apple" id="featuredGrid"></div></div>
   </div>
 
   <!-- ORDERS PAGE -->
   <div id="ordersPage" class="page">
     <div class="page-hero">
-      <h1>My Orders</h1>
-      <p>View your order history</p>
+      <h1>📦 My Orders</h1>
+      <p>View your order history and track your fireworks</p>
     </div>
-    
     <div id="ordersContainer" class="orders-container">
       <div class="empty-orders">
-        <i class="fas fa-receipt" style="font-size: 4rem; color: #e63946; margin-bottom: 20px;"></i>
-        <p>No orders yet. Start shopping!</p>
+        <i class="fas fa-receipt" style="font-size: 4rem; color: #ff6a3d; margin-bottom: 20px;"></i>
+        <p>No orders yet. Start shopping for fireworks!</p>
         <button class="btn-primary-apple" onclick="switchPage('shop')" style="margin-top: 20px;">Shop Now</button>
       </div>
     </div>
@@ -208,153 +211,74 @@
       <h1><i class="fas fa-code"></i> Admin Dashboard</h1>
       <p>Manage orders, view logs, and monitor system activity</p>
     </div>
-    
     <div class="admin-tabs">
       <button class="admin-tab-btn active" onclick="switchAdminTab('orders')">📦 Orders Management</button>
       <button class="admin-tab-btn" onclick="switchAdminTab('logs')">📋 Login Logs</button>
       <button class="admin-tab-btn" onclick="switchAdminTab('users')">👥 User Management</button>
       <button class="admin-tab-btn" onclick="switchAdminTab('redemptions')">🎫 Code Redemptions</button>
     </div>
-    
-    <!-- Orders Management Tab -->
     <div id="adminOrdersTab" class="admin-tab active">
       <div class="admin-actions">
-        <button class="btn-secondary-apple" onclick="refreshAdminOrders()">
-          <i class="fas fa-sync-alt"></i> Refresh Orders
-        </button>
+        <button class="btn-secondary-apple" onclick="refreshAdminOrders()"><i class="fas fa-sync-alt"></i> Refresh Orders</button>
       </div>
-      <div id="adminOrdersContainer" class="admin-orders-container">
-        <div style="text-align: center; padding: 40px;">
-          <i class="fas fa-spinner fa-spin"></i> Loading orders...
-        </div>
-      </div>
+      <div id="adminOrdersContainer" class="admin-orders-container"><div style="text-align: center; padding: 40px;"><i class="fas fa-spinner fa-spin"></i> Loading orders...</div></div>
     </div>
-    
-    <!-- Login Logs Tab -->
     <div id="adminLogsTab" class="admin-tab">
-      <div class="admin-actions">
-        <button class="btn-secondary-apple" onclick="refreshAdminLogs()">
-          <i class="fas fa-sync-alt"></i> Refresh Logs
-        </button>
-      </div>
-      <div id="adminLogsContainer" class="admin-logs-container">
-        <div style="text-align: center; padding: 40px;">
-          <i class="fas fa-spinner fa-spin"></i> Loading logs...
-        </div>
-      </div>
+      <div class="admin-actions"><button class="btn-secondary-apple" onclick="refreshAdminLogs()"><i class="fas fa-sync-alt"></i> Refresh Logs</button></div>
+      <div id="adminLogsContainer" class="admin-logs-container"><div style="text-align: center; padding: 40px;"><i class="fas fa-spinner fa-spin"></i> Loading logs...</div></div>
     </div>
-    
-    <!-- User Management Tab -->
     <div id="adminUsersTab" class="admin-tab">
-      <div class="admin-actions">
-        <button class="btn-secondary-apple" onclick="refreshAdminUsers()">
-          <i class="fas fa-sync-alt"></i> Refresh Users
-        </button>
-      </div>
-      <div id="adminUsersContainer" class="admin-users-container">
-        <div style="text-align: center; padding: 40px;">
-          <i class="fas fa-spinner fa-spin"></i> Loading users...
-        </div>
-      </div>
+      <div class="admin-actions"><button class="btn-secondary-apple" onclick="refreshAdminUsers()"><i class="fas fa-sync-alt"></i> Refresh Users</button></div>
+      <div id="adminUsersContainer" class="admin-users-container"><div style="text-align: center; padding: 40px;"><i class="fas fa-spinner fa-spin"></i> Loading users...</div></div>
     </div>
-    
-    <!-- Code Redemptions Tab -->
     <div id="adminRedemptionsTab" class="admin-tab">
-      <div class="admin-actions">
-        <button class="btn-secondary-apple" onclick="refreshAdminRedemptions()">
-          <i class="fas fa-sync-alt"></i> Refresh Redemptions
-        </button>
-      </div>
-      <div id="adminRedemptionsContainer" class="admin-redemptions-container">
-        <div style="text-align: center; padding: 40px;">
-          <i class="fas fa-spinner fa-spin"></i> Loading redemptions...
-        </div>
-      </div>
+      <div class="admin-actions"><button class="btn-secondary-apple" onclick="refreshAdminRedemptions()"><i class="fas fa-sync-alt"></i> Refresh Redemptions</button></div>
+      <div id="adminRedemptionsContainer" class="admin-redemptions-container"><div style="text-align: center; padding: 40px;"><i class="fas fa-spinner fa-spin"></i> Loading redemptions...</div></div>
     </div>
   </div>
 
-  <!-- HELP PAGE - UPDATED (Removed Phone Support and Contact Form) -->
+  <!-- HELP PAGE -->
   <div id="helpPage" class="page">
-    <div class="page-hero"><h1>Customer Support</h1><p>We're here to help you 24/7. How can we assist you today?</p></div>
+    <div class="page-hero"><h1>🎆 Customer Support 🎇</h1><p>We're here to help you 24/7. How can we assist you today?</p></div>
     <div class="support-grid-apple">
-      <div class="support-card-apple">
-        <i class="fas fa-headset"></i>
-        <h3>Live Chat</h3>
-        <p>Chat with our support team instantly</p>
-        <button class="btn-secondary-apple" onclick="startChat()">Start Chat</button>
-      </div>
-      <div class="support-card-apple">
-        <i class="fas fa-envelope"></i>
-        <h3>Email Support</h3>
-        <p>jessrell1010@gmail.com</p>
-        <p>Response within 24 hours</p>
-        <button class="btn-secondary-apple" onclick="sendEmail()">Send Email</button>
-      </div>
+      <div class="support-card-apple"><i class="fas fa-headset"></i><h3>Live Chat</h3><p>Chat with our support team instantly</p><button class="btn-secondary-apple" onclick="startChat()">Start Chat</button></div>
+      <div class="support-card-apple"><i class="fas fa-envelope"></i><h3>Email Support</h3><p>jlf1010@gmail.com</p><p>Response within 24 hours</p><button class="btn-secondary-apple" onclick="sendEmail()">Send Email</button></div>
     </div>
     <div class="faq-section-apple"><h2>Frequently Asked Questions</h2>
       <div class="faq-list-apple">
-        <div class="faq-item-apple"><div class="faq-question-apple" onclick="toggleFAQ(this)"><span>How do I login account?</span><i class="fas fa-chevron-down"></i></div><div class="faq-answer-apple">Go to account page and select login then enter your account credentials. If you don't have account you can create your accoun on the registration page.</div></div>
-        <div class="faq-item-apple"><div class="faq-question-apple" onclick="toggleFAQ(this)"><span>How do I create account?</span><i class="fas fa-chevron-down"></i></div><div class="faq-answer-apple">Go to account page and select register. You can make account instantly.</div></div>
-        <div class="faq-item-apple"><div class="faq-question-apple" onclick="toggleFAQ(this)"><span>How do I track my order?</span><i class="fas fa-chevron-down"></i></div><div class="faq-answer-apple">You can track your order in the Orders page. Order status is updated in real-time.</div></div>
+        <div class="faq-item-apple"><div class="faq-question-apple" onclick="toggleFAQ(this)"><span>How do I track my order?</span><i class="fas fa-chevron-down"></i></div><div class="faq-answer-apple">You can track your order in the Shop page after logging into your account. Order status is updated in real-time.</div></div>
+        <div class="faq-item-apple"><div class="faq-question-apple" onclick="toggleFAQ(this)"><span>Are fireworks safe?</span><i class="fas fa-chevron-down"></i></div><div class="faq-answer-apple">Yes! All our fireworks are DTI-certified and come with safety instructions. Always follow safety guidelines when handling fireworks.</div></div>
         <div class="faq-item-apple"><div class="faq-question-apple" onclick="toggleFAQ(this)"><span>How do I redeem a promo code?</span><i class="fas fa-chevron-down"></i></div><div class="faq-answer-apple">Go to the Featured page, enter your code in the Code Redemption section, and click Redeem to claim your rewards instantly.</div></div>
-        <div class="faq-item-apple"><div class="faq-question-apple" onclick="toggleFAQ(this)"><span>How do I earn credits?</span><i class="fas fa-chevron-down"></i></div><div class="faq-answer-apple">You can earn credits by redeeming exclusive codes. Credits can be used to pay for your orders!</div></div>
       </div>
     </div>
   </div>
 </main>
 
-<footer><p>© 2026 NOVA — Your all-in-one lifestyle & rewards platform.</p></footer>
+<footer><p>© 2026 JLF Fireworks — Light up your celebrations! 🎆</p></footer>
 
-<!-- Account Modal (Login & Create Account) -->
+<!-- Account Modal -->
 <div id="accountModal" class="modal">
   <div class="modal-content">
-    <div class="modal-header">
-      <h2>Account</h2>
-      <button class="close-modal" onclick="closeAccountModal()">&times;</button>
-    </div>
+    <div class="modal-header"><h2>Account</h2><button class="close-modal" onclick="closeAccountModal()">&times;</button></div>
     <div class="modal-tabs">
       <button class="tab-btn active" onclick="switchTab('login')">Login</button>
       <button class="tab-btn" onclick="switchTab('register')">Create Account</button>
     </div>
-    
-    <!-- Login Form -->
     <div id="loginTab" class="tab-content active">
       <form id="loginForm" onsubmit="handleLogin(event)">
-        <div class="form-group">
-          <label>Phone Number</label>
-          <input type="tel" id="loginPhone" placeholder="9XXXXXXXXX" required>
-        </div>
-        <div class="form-group">
-          <label>Password</label>
-          <input type="password" id="loginPassword" placeholder="Enter your password" required>
-        </div>
+        <div class="form-group"><label>Phone Number</label><input type="tel" id="loginPhone" placeholder="9XXXXXXXXX" required></div>
+        <div class="form-group"><label>Password</label><input type="password" id="loginPassword" placeholder="Enter your password" required></div>
         <button type="submit" class="btn-primary-apple full-width" id="loginBtn">Login</button>
       </form>
     </div>
-    
-    <!-- Register Form -->
     <div id="registerTab" class="tab-content">
       <form id="registerForm" onsubmit="handleRegister(event)">
-        <div class="form-group">
-          <label>Full Name</label>
-          <input type="text" id="regFullName" placeholder="Enter your full name" required>
-        </div>
-        <div class="form-group">
-          <label>Phone Number</label>
-          <input type="tel" id="regPhone" placeholder="9XXXXXXXXX" required>
-        </div>
-        <div class="form-group">
-          <label>Password</label>
-          <input type="password" id="regPassword" placeholder="Create a password" required>
-        </div>
-        <div class="form-group">
-          <label>Confirm Password</label>
-          <input type="password" id="regConfirmPassword" placeholder="Confirm your password" required>
-        </div>
+        <div class="form-group"><label>Full Name</label><input type="text" id="regFullName" placeholder="Enter your full name" required></div>
+        <div class="form-group"><label>Phone Number</label><input type="tel" id="regPhone" placeholder="9XXXXXXXXX" required></div>
+        <div class="form-group"><label>Password</label><input type="password" id="regPassword" placeholder="Create a password" required></div>
+        <div class="form-group"><label>Confirm Password</label><input type="password" id="regConfirmPassword" placeholder="Confirm your password" required></div>
         <button type="submit" class="btn-primary-apple full-width" id="registerBtn">Create Account</button>
-        <div id="registerLoading" class="loading-indicator" style="display: none;">
-          <i class="fas fa-spinner fa-spin"></i> Creating account...
-        </div>
+        <div id="registerLoading" class="loading-indicator" style="display: none;"><i class="fas fa-spinner fa-spin"></i> Creating account...</div>
       </form>
     </div>
   </div>
@@ -363,40 +287,17 @@
 <!-- Profile Modal -->
 <div id="profileModal" class="modal">
   <div class="modal-content profile-modal">
-    <div class="modal-header">
-      <h2><i class="fas fa-user-circle"></i> My Profile</h2>
-      <button class="close-modal" onclick="closeProfileModal()">&times;</button>
-    </div>
+    <div class="modal-header"><h2><i class="fas fa-user-circle"></i> My Profile</h2><button class="close-modal" onclick="closeProfileModal()">&times;</button></div>
     <div class="profile-content">
-      <div class="profile-avatar">
-        <i class="fas fa-user-circle"></i>
-      </div>
+      <div class="profile-avatar"><i class="fas fa-user-circle"></i></div>
       <div class="profile-info">
-        <div class="info-row">
-          <span class="info-label"><i class="fas fa-user"></i> Full Name:</span>
-          <span class="info-value" id="profileName">-</span>
-        </div>
-        <div class="info-row">
-          <span class="info-label"><i class="fas fa-id-card"></i> Account ID:</span>
-          <span class="info-value" id="profileId">-</span>
-        </div>
-        <div class="info-row">
-          <span class="info-label"><i class="fas fa-phone"></i> Phone Number:</span>
-          <span class="info-value" id="profilePhone">-</span>
-        </div>
-        <div class="info-row">
-          <span class="info-label"><i class="fas fa-calendar"></i> Joined Date:</span>
-          <span class="info-value" id="profileJoined">-</span>
-        </div>
-        <div class="info-row">
-          <span class="info-label"><i class="fas fa-coins"></i> Credit Balance:</span>
-          <span class="info-value" id="profileBalance">₱0</span>
-        </div>
+        <div class="info-row"><span class="info-label"><i class="fas fa-user"></i> Full Name:</span><span class="info-value" id="profileName">-</span></div>
+        <div class="info-row"><span class="info-label"><i class="fas fa-id-card"></i> Account ID:</span><span class="info-value" id="profileId">-</span></div>
+        <div class="info-row"><span class="info-label"><i class="fas fa-phone"></i> Phone Number:</span><span class="info-value" id="profilePhone">-</span></div>
+        <div class="info-row"><span class="info-label"><i class="fas fa-calendar"></i> Joined Date:</span><span class="info-value" id="profileJoined">-</span></div>
+        <div class="info-row"><span class="info-label"><i class="fas fa-coins"></i> Credit Balance:</span><span class="info-value" id="profileBalance">₱0</span></div>
       </div>
-      
-      <button class="btn-secondary-apple logout-profile-btn" onclick="logout()">
-        <i class="fas fa-sign-out-alt"></i> Logout
-      </button>
+      <button class="btn-secondary-apple logout-profile-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
     </div>
   </div>
 </div>
@@ -405,7 +306,7 @@
 <div id="cartOverlay" class="cart-overlay"></div>
 <div id="cartDrawer" class="cart-drawer">
   <div class="cart-header"><span>Shopping Cart</span><button class="close-cart" id="closeCartBtn"><i class="fas fa-times"></i></button></div>
-  <div id="cartItemsList" class="cart-items-list"><div class="empty-cart-msg">Your cart is empty.<br>Add something delicious ✨</div></div>
+  <div id="cartItemsList" class="cart-items-list"><div class="empty-cart-msg">Your cart is empty.<br>Add some fireworks! 🎆</div></div>
   <div class="cart-footer"><div class="total-row"><span>Total</span><span id="cartTotalPrice">₱0.00</span></div><button class="checkout-btn" id="checkoutBtn">Checkout →</button></div>
 </div>
 <div id="toastMsg" class="toast-msg">Item added to cart</div>
@@ -413,20 +314,6 @@
 <script src="js/account.js"></script>
 <script src="js/data.js"></script>
 <script src="js/app.js"></script>
-
-<!-- PWA Service Worker Registration -->
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/sw.js')
-        .then(registration => {
-          console.log('✅ Service Worker registered successfully');
-        })
-        .catch(error => {
-          console.log('❌ Service Worker registration failed:', error);
-        });
-    });
-  }
-</script>
+<script>if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('/sw.js').then(r=>console.log('✅ Service Worker registered')).catch(e=>console.log('❌ Service Worker failed'))});}</script>
 </body>
 </html>
